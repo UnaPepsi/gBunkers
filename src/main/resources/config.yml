@@ -1,0 +1,26 @@
+prefix: "&7[&cgBunkers&7] "
+lobby:
+  world: "world"
+  x: 0
+  y: 100
+  z: 0
+lobby_items:
+  not_queued: INK_SACK:8
+  queued: INK_SACK:10
+scoreboard:
+  - "&7------------------"
+  - "&cOnline: &7%players_online%"
+  - "&6Queued: &7%players_queued%"
+  - "&aIn Game: &7%players_in_game%"
+  - "&7------------------"
+messages:
+  plugin_enabled: "&ahas been enabled :D!"
+  plugin_disabled: "&chas been disabled, bye!"
+  new_plugin_version_available: "&aThere's a new version available :D! (%current_version% -> %new_version%) %repository%"
+  no_permissions: "&cYou need (&7%missing_permissions%&c) permissions to do this"
+  joined_without_lunar: "&eIt is recommended that you use &bLunar Client &efor the best user experience!"
+  joined_with_lunar: "&aThanks for using &bLunar Client&a!"
+  already_queued: "&cYou're already queued!"
+  joined_queue: "&aYou have joined the queue!"
+  not_queued: "&cYou are not in a queue!"
+  left_queue: "&aYou have left the queue!"
