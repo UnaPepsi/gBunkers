@@ -4,15 +4,11 @@ lobby:
   x: 0
   y: 100
   z: 0
+  yaw: 0
+  pitch: 0
 lobby_items:
   not_queued: INK_SACK:8
   queued: INK_SACK:10
-scoreboard:
-  - "&7------------------"
-  - "&cOnline: &7%players_online%"
-  - "&6Queued: &7%players_queued%"
-  - "&aIn Game: &7%players_in_game%"
-  - "&7------------------"
 messages:
   plugin_enabled: "&ahas been enabled :D!"
   plugin_disabled: "&chas been disabled, bye!"
@@ -24,3 +20,22 @@ messages:
   joined_queue: "&aYou have joined the queue!"
   not_queued: "&cYou are not in a queue!"
   left_queue: "&aYou have left the queue!"
+  in_game_cant: "&cYou can't do that while in a Game!"
+  broadcast: "%player% &f&ais hosting a game of bunkers!"
+  start_arena_setup: "&eIf at any point you wish to cancel the arena creation, type 'cancel'"
+  set_arena_name: "&eType the Arena's display name (color codes included)"
+  set_arena_border_1: "&eGo to the first corner of the KoTH's claim and type done"
+  set_arena_border_2: "&eGo to the second corner of the KoTH's claim and type done"
+  set_team_home: "&eGo to %team%'s home and type done"
+  set_team_claim_border_1: "&eGo to %team%'s first claim corner and type done"
+  set_team_claim_border_2: "&eGo to %team%'s second claim corner and type done"
+  set_team_block_shop: "&eGo to %team%'s block shop location and type done"
+  set_team_equipment_shop: "&eGo to %team%'s equipment shop location and type done"
+  set_team_sell_shop: "&eGo to %team%&e's sell shop and type done"
+  set_koth_name: "&eType the KoTH's display name (color codes included)"
+  set_koth_pearls_disabled: "&aShould pearls be disabled inside the KoTH claim? y/n"
+  set_koth_claim_corner_1: "&eGo to the first corner of the KoTH's claim and type done/cancel"
+  set_koth_claim_corner_2: "&eGo to the second corner of the KoTH's claim and type done/cancel"
+  set_koth_lowest_capzone_corner: "&eGo to the lowest corner of the KoTH's capzone and type done/cancel"
+  set_koth_highest_capzone_corner: "&eGo to the highest corner of the KoTH's capzone and type done/cancel"
+  set_spectator_spawn: "&eGo to where spectators should spawn and type done/cancel"

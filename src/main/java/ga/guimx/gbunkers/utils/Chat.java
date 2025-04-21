@@ -8,7 +8,10 @@ import org.bukkit.ChatColor;
 
 public class Chat {
     public static String trans(String string){
-        return ChatColor.translateAlternateColorCodes('&',GBunkers.getPrefix()+string);
+        return transNoPrefix(GBunkers.getPrefix()+string);
+    }
+    public static String transNoPrefix(String string){
+        return ChatColor.translateAlternateColorCodes('&',string);
     }
     public static Component toComponent(String string){
         return LegacyComponentSerializer.legacyAmpersand().deserialize(GBunkers.getPrefix()+string);

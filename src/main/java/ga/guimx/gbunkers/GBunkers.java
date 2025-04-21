@@ -4,13 +4,14 @@ import com.lunarclient.apollo.event.EventBus;
 import dev.rollczi.litecommands.LiteCommands;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import dev.rollczi.litecommands.message.LiteMessages;
+import ga.guimx.gbunkers.commands.ArenaCommand;
+import ga.guimx.gbunkers.commands.LobbyCommand;
+import ga.guimx.gbunkers.commands.QueueCommand;
 import ga.guimx.gbunkers.commands.TestCommand;
 import ga.guimx.gbunkers.config.PluginConfig;
+import ga.guimx.gbunkers.listeners.JoinLeaveQueueListener;
 import ga.guimx.gbunkers.listeners.PlayerListener;
-import ga.guimx.gbunkers.utils.Chat;
-import ga.guimx.gbunkers.utils.PluginUpdates;
-import ga.guimx.gbunkers.utils.Task;
-import ga.guimx.gbunkers.utils.TeamManager;
+import ga.guimx.gbunkers.utils.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -35,11 +36,15 @@ public class GBunkers extends JavaPlugin {
         PluginConfig.getInstance().load();
         EventBus.getBus().register(playerListener);
         liteCommands = LiteBukkitFactory.builder("gbunkers",this)
-                .commands(new TestCommand())
+                .commands(new TestCommand(), new QueueCommand(),new LobbyCommand(),new ArenaCommand())
                 .message(LiteMessages.MISSING_PERMISSIONS, permissions -> Chat.trans(PluginConfig.getMessages().get("no_permissions")
                         .replace("%missing_permissions%",permissions.asJoinedText())))
                 .build();
         enableListeners();
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
+            PAPIHook.registerHook();
+        }
+        PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
         checkForUpdates();
     }
@@ -52,6 +57,7 @@ public class GBunkers extends JavaPlugin {
     }
     void enableListeners(){
         getServer().getPluginManager().registerEvents(playerListener,this);
+        getServer().getPluginManager().registerEvents(new JoinLeaveQueueListener(),this);
     }
     void checkForUpdates(){
         Task.runAsync(c -> {
