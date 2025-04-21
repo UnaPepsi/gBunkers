@@ -1,12 +1,16 @@
 package ga.guimx.gbunkers.utils.prompts;
 
 import ga.guimx.gbunkers.GBunkers;
+import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.utils.Arena;
 import ga.guimx.gbunkers.utils.Chat;
+import ga.guimx.gbunkers.utils.Task;
 import org.bukkit.Color;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
+
+import java.io.IOException;
 
 public class ArenaPrompt {
     private Arena arena = Arena.builder()
@@ -16,26 +20,58 @@ public class ArenaPrompt {
             .greenTeam(Arena.Team.builder().color(Color.GREEN).build())
             .koth(Arena.Koth.builder().build())
             .build();
-    public Arena generateSetArenaPrompt(Player player){
+    public Conversation generateSetArenaPrompt(Player player){
         ConversationFactory factory = new ConversationFactory(GBunkers.getInstance());
-
-
-
-
-        Prompt setPearlsDisabled = new FixedSetPrompt("y","n","cancel") {
+        Prompt setSpectatorSpawn = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
                 if (s.equalsIgnoreCase("cancel")){
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setArePearlsDisabled(s.equalsIgnoreCase("y"));
-                return setRedTeamSellShop;
+                arena.setSpectatorSpawn(player.getLocation().clone());
+                Task.runLater(c -> {
+                    player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_creation_done").
+                            replace("%arena_name%",arena.getName())));
+                },2);
+                return Prompt.END_OF_CONVERSATION;
             }
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_pearls_disabled"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_spectator_spawn"));
+            }
+        };
+        Prompt setKothHighestCapzoneCorner = new FixedSetPrompt("done","cancel") {
+            @Override
+            protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getKoth().setHighestCapzoneCorner(player.getLocation().clone());
+                return setSpectatorSpawn;
+            }
+
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_highest_capzone_corner"));
+            }
+        };
+        Prompt setKothLowestCapzoneCorner = new FixedSetPrompt("done","cancel") {
+            @Override
+            protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getKoth().setLowestCapzoneCorner(player.getLocation().clone());
+                return setKothHighestCapzoneCorner;
+            }
+
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_lowest_capzone_corner"));
             }
         };
         Prompt setKothClaimCorner2 = new FixedSetPrompt("done","cancel") {
@@ -46,7 +82,7 @@ public class ArenaPrompt {
                     return Prompt.END_OF_CONVERSATION;
                 }
                 arena.getKoth().setClaimBorder2(player.getLocation().clone());
-                return setPearlsDisabled;
+                return setKothLowestCapzoneCorner;
             }
 
             @Override
@@ -70,55 +106,136 @@ public class ArenaPrompt {
                 return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_claim_corner_1"));
             }
         };
-        Prompt setKothLowestCapzoneCorner = new FixedSetPrompt("done","cancel") {
+        Prompt setPearlsDisabled = new FixedSetPrompt("y","n","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
                 if (s.equalsIgnoreCase("cancel")){
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setLowestCapzoneCorner(player.getLocation().clone());
+                arena.getKoth().setPearlsDisabled(s.equalsIgnoreCase("y"));
                 return setKothClaimCorner1;
             }
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_lowest_capzone_corner"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_pearls_disabled"));
             }
         };
-        Prompt setKothHighestCapzoneCorner = new FixedSetPrompt("done","cancel") {
+        Prompt setKothName = new StringPrompt() {
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_name"));
+            }
+
+            @Override
+            public Prompt acceptInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getKoth().setName(Chat.transNoPrefix(s));
+                return setPearlsDisabled;
+            }
+        };
+        //--- this is absurd as hell maybe ill refactor later
+        //YELLOW
+        Prompt setYellowTeamSellShop = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
                 if (s.equalsIgnoreCase("cancel")){
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setHighestCapzoneCorner(player.getLocation().clone());
-                return setKothLowestCapzoneCorner;
+                arena.getYellowTeam().setSellShop(player.getLocation().clone());
+                return setKothName;
             }
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_highest_capzone_corner"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&eYELLOW"));
             }
         };
-        Prompt setSpectatorSpawn = new FixedSetPrompt("done","cancel") {
+        Prompt setYellowTeamEquipmentShop = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
                 if (s.equalsIgnoreCase("cancel")){
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.setSpectatorSpawn(player.getLocation().clone());
-                return setKothHighestCapzoneCorner;
+                arena.getYellowTeam().setEquipmentShop(player.getLocation().clone());
+                return setYellowTeamSellShop;
             }
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_spectator_spawn"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&eYELLOW"));
             }
         };
-        //---
+        Prompt setYellowTeamBlockShop = new FixedSetPrompt("done","cancel") {
+            @Override
+            protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getYellowTeam().setBlockShop(player.getLocation().clone());
+                return setYellowTeamEquipmentShop;
+            }
+
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&eYELLOW"));
+            }
+        };
+        Prompt setYellowTeamClaimBorder2 = new FixedSetPrompt("done","cancel") {
+            @Override
+            protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getYellowTeam().setClaimBorder2(player.getLocation().clone());
+                return setYellowTeamBlockShop;
+            }
+
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&eYELLOW"));
+            }
+        };
+        Prompt setYellowTeamClaimBorder1 = new FixedSetPrompt("done","cancel") {
+            @Override
+            protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getYellowTeam().setClaimBorder1(player.getLocation().clone());
+                return setYellowTeamClaimBorder2;
+            }
+
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&eYELLOW"));
+            }
+        };
+        Prompt setYellowTeamHome = new FixedSetPrompt("done","cancel") {
+            @Override
+            protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
+                arena.getYellowTeam().setHome(player.getLocation().clone());
+                return setYellowTeamClaimBorder1;
+            }
+
+            @Override
+            public String getPromptText(ConversationContext conversationContext) {
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&eYELLOW"));
+            }
+        };
         //GREEN
         Prompt setGreenTeamSellShop = new FixedSetPrompt("done","cancel") {
             @Override
@@ -133,7 +250,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&9BLUE"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamEquipmentShop = new FixedSetPrompt("done","cancel") {
@@ -149,7 +266,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&9BLUE"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamBlockShop = new FixedSetPrompt("done","cancel") {
@@ -165,7 +282,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&9BLUE"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamClaimBorder2 = new FixedSetPrompt("done","cancel") {
@@ -181,7 +298,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&9BLUE"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamClaimBorder1 = new FixedSetPrompt("done","cancel") {
@@ -197,19 +314,23 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&9BLUE"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamHome = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
                 arena.getGreenTeam().setHome(player.getLocation().clone());
                 return setGreenTeamClaimBorder1;
             }
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&9BLUE"));
+                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&aGREEN"));
             }
         };
         //BLUE
@@ -296,6 +417,10 @@ public class ArenaPrompt {
         Prompt setBlueTeamHome = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
                 arena.getBlueTeam().setHome(player.getLocation().clone());
                 return setBlueTeamClaimBorder1;
             }
@@ -389,6 +514,10 @@ public class ArenaPrompt {
         Prompt setRedTeamHome = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
                 arena.getRedTeam().setHome(player.getLocation().clone());
                 return setRedTeamClaimBorder1;
             }
@@ -401,6 +530,10 @@ public class ArenaPrompt {
         Prompt setArenaBorder2 = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
                 arena.setBorder2(player.getLocation().clone());
                 return setRedTeamHome;
             }
@@ -413,7 +546,12 @@ public class ArenaPrompt {
         Prompt setArenaBorder1 = new FixedSetPrompt("done","cancel") {
             @Override
             protected Prompt acceptValidatedInput(ConversationContext conversationContext, String s) {
+                if (s.equalsIgnoreCase("cancel")){
+                    arena = null;
+                    return Prompt.END_OF_CONVERSATION;
+                }
                 arena.setBorder1(player.getLocation().clone());
+                arena.setWorld(player.getLocation().clone().getWorld());
                 return setArenaBorder2;
             }
 
@@ -434,11 +572,22 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.setName(Chat.transNoPrefix(s));
+                arena.setName(s);
                 return setArenaBorder1;
             }
         };
-        factory.withFirstPrompt(setName).withModality(true).withLocalEcho(true).buildConversation(player).begin();
-        return arena;
+        player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("start_arena_setup")));
+        return factory.withFirstPrompt(setName).withModality(true).withLocalEcho(true).addConversationAbandonedListener(listener -> {
+            if (arena == null){
+                return;
+            }
+            try {
+                ArenasConfig.getInstance().addArena(arena);
+            }catch (IllegalArgumentException | IOException ex){
+                ex.printStackTrace();
+                Chat.bukkitSend("ASd");
+                player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_conflict")));
+            }
+        }).buildConversation(player);
     }
 }

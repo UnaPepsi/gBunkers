@@ -8,6 +8,7 @@ import ga.guimx.gbunkers.commands.ArenaCommand;
 import ga.guimx.gbunkers.commands.LobbyCommand;
 import ga.guimx.gbunkers.commands.QueueCommand;
 import ga.guimx.gbunkers.commands.TestCommand;
+import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.listeners.JoinLeaveQueueListener;
 import ga.guimx.gbunkers.listeners.PlayerListener;
@@ -34,6 +35,7 @@ public class GBunkers extends JavaPlugin {
         instance = this;
         playerListener = new PlayerListener();
         PluginConfig.getInstance().load();
+        ArenasConfig.getInstance().load();
         EventBus.getBus().register(playerListener);
         liteCommands = LiteBukkitFactory.builder("gbunkers",this)
                 .commands(new TestCommand(), new QueueCommand(),new LobbyCommand(),new ArenaCommand())

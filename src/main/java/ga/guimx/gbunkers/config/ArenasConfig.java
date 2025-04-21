@@ -8,13 +8,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArenasConfig {
+    @Getter
+    private static final ArenasConfig instance = new ArenasConfig();
     private File file;
     private YamlConfiguration config;
     @Getter
@@ -217,28 +221,20 @@ public class ArenasConfig {
                             .claimBorder1(new Location(world,
                                     config.getDouble(path+"koth.claim_border_1.x"),
                                     0,
-                                    config.getDouble(path+"koth.claim_border_1.z"),
-                                    config.getFloat(path+"koth.claim_border_1.yaw"),
-                                    config.getFloat(path+"koth.claim_border_1.pitch")))
+                                    config.getDouble(path+"koth.claim_border_1.z")))
                             .claimBorder2(new Location(world,
                                     config.getDouble(path+"koth.claim_border_2.x"),
                                     0,
-                                    config.getDouble(path+"koth.claim_border_2.z"),
-                                    config.getFloat(path+"koth.claim_border_2.yaw"),
-                                    config.getFloat(path+"koth.claim_border_2.pitch")))
+                                    config.getDouble(path+"koth.claim_border_2.z")))
                             .lowestCapzoneCorner(new Location(world,
                                     config.getDouble(path+"koth.lowest_capzone_corner.x"),
                                     config.getDouble(path+"koth.lowest_capzone_corner.y"),
-                                    config.getDouble(path+"koth.lowest_capzone_corner.z"),
-                                    config.getFloat(path+"koth.lowest_capzone_corner.yaw"),
-                                    config.getFloat(path+"koth.lowest_capzone_corner.pitch")))
+                                    config.getDouble(path+"koth.lowest_capzone_corner.z")))
                             .highestCapzoneCorner(new Location(world,
                                     config.getDouble(path+"koth.highest_capzone_corner.x"),
                                     config.getDouble(path+"koth.highest_capzone_corner.y"),
-                                    config.getDouble(path+"koth.highest_capzone_corner.z"),
-                                    config.getFloat(path+"koth.highest_capzone_corner.yaw"),
-                                    config.getFloat(path+"koth.highest_capzone_corner.pitch")))
-                            .arePearlsDisabled(config.getBoolean(path+"koth.pearls_disabled"))
+                                    config.getDouble(path+"koth.highest_capzone_corner.z")))
+                            .pearlsDisabled(config.getBoolean(path+"koth.pearls_disabled"))
                             .build())
                     .spectatorSpawn(new Location(world,
                         config.getDouble(path+"spectator_spawn.x"),
@@ -249,5 +245,57 @@ public class ArenasConfig {
                     .build()
             );
         });
+    }
+    public void addArena(Arena arena) throws IOException {
+        if (arenas.stream().anyMatch(a -> arena.getName().equalsIgnoreCase(a.getName()))){
+            throw new IllegalArgumentException(String.format("There are multiple arenas named \"%s\"",arena.getName()));
+        }
+        ConfigurationSection configSection = config.createSection(arena.getName());
+        configSection.set("world",arena.getWorld().getName());
+        configSection.set("border_1.x",arena.getBorder1().getX());
+        configSection.set("border_1.y",arena.getBorder1().getY());
+        configSection.set("border_1.z",arena.getBorder1().getZ());
+        configSection.set("border_2.x",arena.getBorder2().getX());
+        configSection.set("border_2.y",arena.getBorder2().getY());
+        configSection.set("border_2.z",arena.getBorder2().getZ());
+        arena.getTeams().forEach((c,a) -> {
+            configSection.set(c+"_team.home.x",a.getHome().getX());
+            configSection.set(c+"_team.home.y",a.getHome().getY());
+            configSection.set(c+"_team.home.z",a.getHome().getZ());
+            configSection.set(c+"_team.home.yaw",a.getHome().getYaw());
+            configSection.set(c+"_team.home.pitch",a.getHome().getPitch());
+            configSection.set(c+"_team.claim_border_1.x",a.getClaimBorder1().getX());
+            configSection.set(c+"_team.claim_border_1.z",a.getClaimBorder1().getZ());
+            configSection.set(c+"_team.claim_border_2.x",a.getClaimBorder2().getX());
+            configSection.set(c+"_team.claim_border_2.z",a.getClaimBorder2().getZ());
+            configSection.set(c+"_team.block_shop.x",a.getBlockShop().getX());
+            configSection.set(c+"_team.block_shop.y",a.getBlockShop().getY());
+            configSection.set(c+"_team.block_shop.z",a.getBlockShop().getZ());
+            configSection.set(c+"_team.equipment_shop.x",a.getEquipmentShop().getX());
+            configSection.set(c+"_team.equipment_shop.y",a.getEquipmentShop().getY());
+            configSection.set(c+"_team.equipment_shop.z",a.getEquipmentShop().getZ());
+            configSection.set(c+"_team.sell_shop.x",a.getSellShop().getX());
+            configSection.set(c+"_team.sell_shop.y",a.getSellShop().getY());
+            configSection.set(c+"_team.sell_shop.z",a.getSellShop().getZ());
+        });
+        configSection.set("koth.name",arena.getKoth().getName());
+        configSection.set("koth.claim_border_1.x",arena.getKoth().getClaimBorder1().getX());
+        configSection.set("koth.claim_border_1.z",arena.getKoth().getClaimBorder1().getZ());
+        configSection.set("koth.claim_border_2.x",arena.getKoth().getClaimBorder2().getX());
+        configSection.set("koth.claim_border_2.z",arena.getKoth().getClaimBorder2().getZ());
+        configSection.set("koth.lowest_capzone_corner.x",arena.getKoth().getLowestCapzoneCorner().getX());
+        configSection.set("koth.lowest_capzone_corner.y",arena.getKoth().getLowestCapzoneCorner().getY());
+        configSection.set("koth.lowest_capzone_corner.z",arena.getKoth().getLowestCapzoneCorner().getZ());
+        configSection.set("koth.highest_capzone_corner.x",arena.getKoth().getHighestCapzoneCorner().getX());
+        configSection.set("koth.highest_capzone_corner.y",arena.getKoth().getHighestCapzoneCorner().getY());
+        configSection.set("koth.highest_capzone_corner.z",arena.getKoth().getHighestCapzoneCorner().getZ());
+        configSection.set("koth.pearls_disabled",arena.getKoth().isPearlsDisabled());
+        configSection.set("spectator_spawn.x",arena.getSpectatorSpawn().getX());
+        configSection.set("spectator_spawn.y",arena.getSpectatorSpawn().getY());
+        configSection.set("spectator_spawn.z",arena.getSpectatorSpawn().getZ());
+        configSection.set("spectator_spawn.yaw",arena.getSpectatorSpawn().getYaw());
+        configSection.set("spectator_spawn.pitch",arena.getSpectatorSpawn().getPitch());
+
+        config.save(file);
     }
 }

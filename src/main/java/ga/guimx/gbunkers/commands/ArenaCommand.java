@@ -13,7 +13,7 @@ public class ArenaCommand {
 
     @Execute(name="set")
     void setArena(@Context Player sender) {
-        ArenaPrompt.generateSetArenaPrompt(sender);
+        new ArenaPrompt().generateSetArenaPrompt(sender).begin();
     }
 
 }

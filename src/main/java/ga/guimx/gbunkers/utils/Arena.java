@@ -7,6 +7,9 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Setter
 @Builder
 @Getter
@@ -21,6 +24,14 @@ public class Arena {
     private Team yellowTeam;
     private Koth koth;
     private Location spectatorSpawn;
+    public Map<String,Team> getTeams(){
+        return new HashMap<String,Team>(){{
+            put("red",redTeam);
+            put("blue",blueTeam);
+            put("green",greenTeam);
+            put("yellow",yellowTeam);
+        }};
+    }
 
     @Setter
     @Builder
@@ -39,7 +50,7 @@ public class Arena {
     @Getter
     public static class Koth{
         private String name;
-        private boolean arePearlsDisabled;
+        private boolean pearlsDisabled;
         private Location claimBorder1;
         private Location claimBorder2;
         private Location lowestCapzoneCorner;
