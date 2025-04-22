@@ -1,4 +1,5 @@
 prefix: "&7[&cgBunkers&7] "
+players_needed_to_start_game: 20
 lobby:
   world: "world"
   x: 0
@@ -34,10 +35,10 @@ messages:
   set_team_sell_shop: "&eGo to %team%&e's sell shop and type done"
   set_koth_name: "&eType the KoTH's display name (color codes included)"
   set_koth_pearls_disabled: "&aShould pearls be disabled inside the KoTH claim? y/n"
-  set_koth_claim_corner_1: "&eGo to the first corner of the KoTH's claim and type done/cancel"
-  set_koth_claim_corner_2: "&eGo to the second corner of the KoTH's claim and type done/cancel"
-  set_koth_lowest_capzone_corner: "&eGo to the lowest corner of the KoTH's capzone and type done/cancel"
-  set_koth_highest_capzone_corner: "&eGo to the highest corner of the KoTH's capzone and type done/cancel"
-  set_spectator_spawn: "&eGo to where spectators should spawn and type done/cancel"
+  set_koth_claim_corner_1: "&eGo to the first corner of the KoTH's claim and type done"
+  set_koth_claim_corner_2: "&eGo to the second corner of the KoTH's claim and type done"
+  set_koth_lowest_capzone_corner: "&eGo to the lowest corner of the KoTH's capzone and type done"
+  set_koth_highest_capzone_corner: "&eGo to the highest corner of the KoTH's capzone and type done"
+  set_spectator_spawn: "&eGo to where spectators should spawn and type done"
   arena_creation_done: "&aFinished %arena_name% &acreation!"
   arena_conflict: "&cThere's another arena with the same name!"

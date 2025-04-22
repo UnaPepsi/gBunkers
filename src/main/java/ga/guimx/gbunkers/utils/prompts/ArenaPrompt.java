@@ -5,7 +5,6 @@ import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.utils.Arena;
 import ga.guimx.gbunkers.utils.Chat;
-import ga.guimx.gbunkers.utils.Task;
 import org.bukkit.Color;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
@@ -30,10 +29,6 @@ public class ArenaPrompt {
                     return Prompt.END_OF_CONVERSATION;
                 }
                 arena.setSpectatorSpawn(player.getLocation().clone());
-                Task.runLater(c -> {
-                    player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_creation_done").
-                            replace("%arena_name%",arena.getName())));
-                },2);
                 return Prompt.END_OF_CONVERSATION;
             }
 
@@ -583,9 +578,10 @@ public class ArenaPrompt {
             }
             try {
                 ArenasConfig.getInstance().addArena(arena);
+                player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_creation_done").
+                        replace("%arena_name%",arena.getName())));
             }catch (IllegalArgumentException | IOException ex){
                 ex.printStackTrace();
-                Chat.bukkitSend("ASd");
                 player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_conflict")));
             }
         }).buildConversation(player);

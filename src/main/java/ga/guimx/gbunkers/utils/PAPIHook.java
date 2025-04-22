@@ -26,6 +26,8 @@ public class PAPIHook extends PlaceholderExpansion {
         switch (params.toLowerCase()){
             case "players_queued":
                 return PlayerInfo.getPlayersQueued().size()+"";
+            case "players_in_game":
+                return PlayerInfo.getPlayersInGame().size()+"";
         }
         return null;
     }

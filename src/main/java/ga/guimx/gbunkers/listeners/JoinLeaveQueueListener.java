@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class JoinLeaveQueueListener implements Listener {
     @EventHandler
@@ -28,5 +29,10 @@ public class JoinLeaveQueueListener implements Listener {
             player.getInventory().clear();
             player.getInventory().setItem(0, PluginConfig.getLobbyInventory().get("not_queued"));
         }
+    }
+
+    @EventHandler
+    void onDisconnect(PlayerQuitEvent event){
+        PlayerInfo.getPlayersQueued().remove(event.getPlayer().getUniqueId());
     }
 }

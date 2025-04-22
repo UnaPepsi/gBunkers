@@ -3,7 +3,7 @@ package ga.guimx.gbunkers.utils;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Color;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -37,7 +37,7 @@ public class Arena {
     @Builder
     @Getter
     public static class Team{
-        private Color color;
+        private ChatColor color;
         private Location home;
         private Location claimBorder1;
         private Location claimBorder2;

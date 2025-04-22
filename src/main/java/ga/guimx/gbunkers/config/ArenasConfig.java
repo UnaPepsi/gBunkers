@@ -4,10 +4,7 @@ import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.utils.Arena;
 import ga.guimx.gbunkers.utils.Chat;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -15,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ArenasConfig {
     @Getter
@@ -69,7 +67,7 @@ public class ArenasConfig {
                             config.getDouble(path+"border_2.y"),
                             config.getDouble(path+"border_2.z")))
                     .redTeam(Arena.Team.builder()
-                            .color(Color.RED)
+                            .color(ChatColor.RED)
                             .home(new Location(world,
                                     config.getDouble(path+"red_team.home.x"),
                                     config.getDouble(path+"red_team.home.y"),
@@ -106,7 +104,7 @@ public class ArenasConfig {
                             .build()
                     )
                     .blueTeam(Arena.Team.builder()
-                            .color(Color.BLUE)
+                            .color(ChatColor.BLUE)
                             .home(new Location(world,
                                     config.getDouble(path+"blue_team.home.x"),
                                     config.getDouble(path+"blue_team.home.y"),
@@ -143,7 +141,7 @@ public class ArenasConfig {
                             .build()
                     )
                     .yellowTeam(Arena.Team.builder()
-                            .color(Color.YELLOW)
+                            .color(ChatColor.YELLOW)
                             .home(new Location(world,
                                     config.getDouble(path+"yellow_team.home.x"),
                                     config.getDouble(path+"yellow_team.home.y"),
@@ -180,7 +178,7 @@ public class ArenasConfig {
                             .build()
                     )
                     .greenTeam(Arena.Team.builder()
-                            .color(Color.GREEN)
+                            .color(ChatColor.GREEN)
                             .home(new Location(world,
                                     config.getDouble(path+"green_team.home.x"),
                                     config.getDouble(path+"green_team.home.y"),
@@ -297,5 +295,17 @@ public class ArenasConfig {
         configSection.set("spectator_spawn.pitch",arena.getSpectatorSpawn().getPitch());
 
         config.save(file);
+    }
+
+    public void deleteArena(Arena arena) throws IOException{
+        config.set(arena.getName(),null);
+        config.save(file);
+    }
+    public void deleteArena(String arena) throws IOException{
+        Optional<Arena> arena1 = arenas.stream().filter(a -> a.getName().equalsIgnoreCase(arena)).findFirst();
+        if (!arena1.isPresent()){
+            throw new IllegalArgumentException("Invalid arena: "+arena);
+        }
+        deleteArena(arena1.get());
     }
 }

@@ -39,6 +39,7 @@ public class GBunkers extends JavaPlugin {
         EventBus.getBus().register(playerListener);
         liteCommands = LiteBukkitFactory.builder("gbunkers",this)
                 .commands(new TestCommand(), new QueueCommand(),new LobbyCommand(),new ArenaCommand())
+                .argument(Arena.class,new ArenaArgument())
                 .message(LiteMessages.MISSING_PERMISSIONS, permissions -> Chat.trans(PluginConfig.getMessages().get("no_permissions")
                         .replace("%missing_permissions%",permissions.asJoinedText())))
                 .build();
