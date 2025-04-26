@@ -6,6 +6,8 @@ import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
 import ga.guimx.gbunkers.GBunkers;
+import ga.guimx.gbunkers.config.ArenasConfig;
+import ga.guimx.gbunkers.game.StartGame;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -46,5 +48,10 @@ public class TestCommand {
         GBunkers.getTeamManager().getByPlayerUuid(target.getUniqueId()).ifPresent(team -> {
             team.removeMember(team.getMembers().stream().filter(m -> m.getPlayer().getUniqueId().equals(target.getUniqueId())).findFirst().get());
         });
+    }
+
+    @Execute(name="startgame")
+    void startGame(@Context Player sender){
+        StartGame.startGame(ArenasConfig.getArenas().get(0));
     }
 }

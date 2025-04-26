@@ -28,7 +28,7 @@ public class Team {
         this.color = color;
     }
     public void setTeamViewToMembers(){
-        NamedTextColor displayNameColor = NamedTextColor.NAMES.value(color.name());
+        NamedTextColor displayNameColor = NamedTextColor.NAMES.value(color.name().toLowerCase());
         Color markerColor = new Color(displayNameColor.red(), displayNameColor.green(), displayNameColor.blue());
         this.team = GBunkers.getTeamManager().createTeam();
         members.forEach(p -> {

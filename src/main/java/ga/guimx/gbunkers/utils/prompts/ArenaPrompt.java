@@ -5,7 +5,7 @@ import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.utils.Arena;
 import ga.guimx.gbunkers.utils.Chat;
-import org.bukkit.Color;
+import org.bukkit.ChatColor;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
 
@@ -13,10 +13,10 @@ import java.io.IOException;
 
 public class ArenaPrompt {
     private Arena arena = Arena.builder()
-            .redTeam(Arena.Team.builder().color(Color.RED).build())
-            .blueTeam(Arena.Team.builder().color(Color.BLUE).build())
-            .yellowTeam(Arena.Team.builder().color(Color.YELLOW).build())
-            .greenTeam(Arena.Team.builder().color(Color.GREEN).build())
+            .redTeam(Arena.Team.builder().color(ChatColor.RED).build())
+            .blueTeam(Arena.Team.builder().color(ChatColor.BLUE).build())
+            .yellowTeam(Arena.Team.builder().color(ChatColor.YELLOW).build())
+            .greenTeam(Arena.Team.builder().color(ChatColor.GREEN).build())
             .koth(Arena.Koth.builder().build())
             .build();
     public Conversation generateSetArenaPrompt(Player player){

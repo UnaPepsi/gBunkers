@@ -15,7 +15,9 @@ import ga.guimx.gbunkers.listeners.PlayerListener;
 import ga.guimx.gbunkers.utils.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -73,7 +75,7 @@ public class GBunkers extends JavaPlugin {
                             .replace("%repository%", "https://github.com/UnaPepsi/gBunkers/releases")));
                 }
             }catch (IOException e) {
-                getLogger().warning("gAbility couldn't get the latest version of the plugin");
+                getLogger().warning("gBunkers couldn't get the latest version of the plugin");
             }
         });
     }
