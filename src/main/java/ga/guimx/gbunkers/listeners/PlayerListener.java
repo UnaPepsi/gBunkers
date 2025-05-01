@@ -5,15 +5,16 @@ import com.lunarclient.apollo.event.ApolloListener;
 import com.lunarclient.apollo.event.Listen;
 import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
 import ga.guimx.gbunkers.config.PluginConfig;
-import ga.guimx.gbunkers.utils.Chat;
-import ga.guimx.gbunkers.utils.PlayerInfo;
-import ga.guimx.gbunkers.utils.Task;
+import ga.guimx.gbunkers.game.ArenaInfo;
+import ga.guimx.gbunkers.utils.*;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
@@ -59,5 +60,21 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId())){
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    void onBlockInteract(PlayerInteractEvent event){
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.LEFT_CLICK_BLOCK) return;
+        Player player = event.getPlayer();
+        if (PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+        ArenaInfo.getArenasInUse().forEach((arena,map) -> {
+            map.values().forEach(team -> {
+                Arena.Team arenaTeam = arena.getTeams().get(team.getColor().name().toLowerCase());
+                if (!LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) ||
+                        (!team.getMembers().contains(player) || team.getDtr() > 0 )){
+                    event.setCancelled(true);
+                }
+            });
+        });
     }
 }

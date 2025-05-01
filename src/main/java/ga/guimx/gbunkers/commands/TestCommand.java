@@ -7,7 +7,7 @@ import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
 import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.ArenasConfig;
-import ga.guimx.gbunkers.game.StartGame;
+import ga.guimx.gbunkers.game.Game;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -52,6 +52,6 @@ public class TestCommand {
 
     @Execute(name="startgame")
     void startGame(@Context Player sender){
-        StartGame.startGame(ArenasConfig.getArenas().get(0));
+        Game.startGame(ArenasConfig.getArenas().get(0));
     }
 }
