@@ -8,10 +8,14 @@ import com.lunarclient.apollo.module.waypoint.WaypointModule;
 import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.utils.Arena;
 import ga.guimx.gbunkers.utils.PlayerInfo;
+import ga.guimx.gbunkers.utils.Task;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.awt.*;
@@ -37,7 +41,9 @@ public class Game {
             ChatColor color = colors[i%4];
             teams.get(color).getMembers().add(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)));
             PlayerInfo.getPlayersInGame().add(PlayerInfo.getPlayersQueued().get(i));
+            PlayerInfo.getPlayersBalance().put(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)),0);
         }
+        giveMoneyToPlayers(playersInQueue);
         ArenaInfo.getArenasInUse().put(arena,teams);
         PlayerInfo.getPlayersQueued().clear();
         teams.get(ChatColor.RED)
@@ -85,6 +91,7 @@ public class Game {
                     team.addPlayer(p);
                 });
         applyWaypoints(arena,playersInQueue);
+        spawnVillagers(arena);
     }
     public static void applyWaypoints(Arena arena, List<Player> players){
         List<UUID> playersUUID = players.stream().map(Player::getUniqueId).collect(Collectors.toList());
@@ -113,5 +120,38 @@ public class Game {
                 .hidden(false)
                 .build()
         );
+    }
+    public static void giveMoneyToPlayers(List<Player> players){
+        Task.runTimer(task -> {
+            for (Player player : players) {
+                if (!PlayerInfo.getPlayersBalance().containsKey(player)){
+                    players.remove(player);
+                    continue;
+                }
+                if (players.isEmpty()){
+                    task.cancel();
+                    return;
+                }
+                PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)+10);
+            }
+        },0,20*5);
+    }
+
+    public static void spawnVillagers(Arena arena){
+        arena.getTeams().forEach((color,team) -> {
+            Villager blockshop = team.getBlockShop().getWorld().spawn(team.getBlockShop(), Villager.class);
+            blockshop.setAdult();
+            blockshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,Integer.MAX_VALUE));
+            blockshop.setCustomName(ChatColor.valueOf(color)+"Block Shop");
+            Villager sellshop = team.getSellShop().getWorld().spawn(team.getSellShop(), Villager.class);
+            sellshop.setAdult();
+            sellshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,Integer.MAX_VALUE));
+            sellshop.setCustomName(ChatColor.valueOf(color)+"Sell Shop");
+            Villager equipmentshop = team.getEquipmentShop().getWorld().spawn(team.getEquipmentShop(), Villager.class);
+            equipmentshop.setAdult();
+            equipmentshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,Integer.MAX_VALUE));
+            equipmentshop.setCustomName(ChatColor.valueOf(color)+"Equipment Shop");
+
+        });
     }
 }

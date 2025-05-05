@@ -3,6 +3,7 @@ package ga.guimx.gbunkers.utils;
 import ga.guimx.gbunkers.GBunkers;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class PAPIHook extends PlaceholderExpansion {
@@ -28,6 +29,12 @@ public class PAPIHook extends PlaceholderExpansion {
                 return PlayerInfo.getPlayersQueued().size()+"";
             case "players_in_game":
                 return PlayerInfo.getPlayersInGame().size()+"";
+            case "balance":
+                Player onlinePlayer = player.getPlayer();
+                if (onlinePlayer == null){
+                    return "0";
+                }
+                return PlayerInfo.getPlayersBalance().getOrDefault(onlinePlayer,0)+"";
         }
         return null;
     }
