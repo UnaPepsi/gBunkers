@@ -7,6 +7,7 @@ import com.lunarclient.apollo.module.waypoint.Waypoint;
 import com.lunarclient.apollo.module.waypoint.WaypointModule;
 import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.utils.Arena;
+import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +18,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.util.Vector;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class Game {
             teams.put(color,new Team(new ArrayList<>(),color));
         }
         for (int i = 0; i < PlayerInfo.getPlayersQueued().size(); i++){
-            ChatColor color = colors[i%4];
+            ChatColor color = colors[i%2];
             teams.get(color).getMembers().add(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)));
             PlayerInfo.getPlayersInGame().add(PlayerInfo.getPlayersQueued().get(i));
             PlayerInfo.getPlayersBalance().put(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)),0);
@@ -138,20 +140,31 @@ public class Game {
     }
 
     public static void spawnVillagers(Arena arena){
+        Chat.bukkitSend("spawnVillagers called!");
         arena.getTeams().forEach((color,team) -> {
+            Chat.bukkitSend("spawnVillagers 1");
             Villager blockshop = team.getBlockShop().getWorld().spawn(team.getBlockShop(), Villager.class);
             blockshop.setAdult();
-            blockshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,Integer.MAX_VALUE));
-            blockshop.setCustomName(ChatColor.valueOf(color)+"Block Shop");
+            blockshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
+            blockshop.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,100000,10));
+            blockshop.setCustomName(ChatColor.valueOf(color.toUpperCase())+"Block Shop");
+            Chat.bukkitSend("spawnVillagers 2");
             Villager sellshop = team.getSellShop().getWorld().spawn(team.getSellShop(), Villager.class);
             sellshop.setAdult();
-            sellshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,Integer.MAX_VALUE));
-            sellshop.setCustomName(ChatColor.valueOf(color)+"Sell Shop");
+            sellshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
+            sellshop.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,100000,10));
+            sellshop.setCustomName(ChatColor.valueOf(color.toUpperCase())+"Sell Shop");
+            Chat.bukkitSend("spawnVillagers 3");
             Villager equipmentshop = team.getEquipmentShop().getWorld().spawn(team.getEquipmentShop(), Villager.class);
             equipmentshop.setAdult();
-            equipmentshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,Integer.MAX_VALUE,Integer.MAX_VALUE));
-            equipmentshop.setCustomName(ChatColor.valueOf(color)+"Equipment Shop");
-
+            equipmentshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
+            equipmentshop.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,100000,10));
+            equipmentshop.setCustomName(ChatColor.valueOf(color.toUpperCase())+"Equipment Shop");
+            Task.runTimer(a -> {
+                blockshop.setVelocity(new Vector(0,0,0));
+                sellshop.setVelocity(new Vector(0,0,0));
+                equipmentshop.setVelocity(new Vector(0,0,0));
+            },0,1);
         });
     }
 }

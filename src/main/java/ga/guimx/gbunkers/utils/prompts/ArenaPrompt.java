@@ -28,7 +28,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.setSpectatorSpawn(player.getLocation().clone());
+                arena.setSpectatorSpawn(player.getLocation().getBlock().getLocation().clone());
                 return Prompt.END_OF_CONVERSATION;
             }
 
@@ -44,7 +44,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setHighestCapzoneCorner(player.getLocation().clone());
+                arena.getKoth().setHighestCapzoneCorner(player.getLocation().getBlock().getLocation().clone());
                 return setSpectatorSpawn;
             }
 
@@ -60,7 +60,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setLowestCapzoneCorner(player.getLocation().clone());
+                arena.getKoth().setLowestCapzoneCorner(player.getLocation().getBlock().getLocation().clone());
                 return setKothHighestCapzoneCorner;
             }
 
@@ -76,7 +76,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setClaimBorder2(player.getLocation().clone());
+                arena.getKoth().setClaimBorder2(player.getLocation().getBlock().getLocation().clone());
                 return setKothLowestCapzoneCorner;
             }
 
@@ -92,7 +92,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setClaimBorder1(player.getLocation().clone());
+                arena.getKoth().setClaimBorder1(player.getLocation().getBlock().getLocation().clone());
                 return setKothClaimCorner2;
             }
 
@@ -142,7 +142,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getYellowTeam().setSellShop(player.getLocation().clone());
+                arena.getYellowTeam().setSellShop(player.getLocation().getBlock().getLocation().clone());
                 return setKothName;
             }
 
@@ -158,7 +158,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getYellowTeam().setEquipmentShop(player.getLocation().clone());
+                arena.getYellowTeam().setEquipmentShop(player.getLocation().getBlock().getLocation().clone());
                 return setYellowTeamSellShop;
             }
 
@@ -174,7 +174,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getYellowTeam().setBlockShop(player.getLocation().clone());
+                arena.getYellowTeam().setBlockShop(player.getLocation().getBlock().getLocation().clone());
                 return setYellowTeamEquipmentShop;
             }
 
@@ -190,7 +190,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getYellowTeam().setClaimBorder2(player.getLocation().clone());
+                arena.getYellowTeam().setClaimBorder2(player.getLocation().getBlock().getLocation().clone());
                 return setYellowTeamBlockShop;
             }
 
@@ -206,7 +206,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getYellowTeam().setClaimBorder1(player.getLocation().clone());
+                arena.getYellowTeam().setClaimBorder1(player.getLocation().getBlock().getLocation().clone());
                 return setYellowTeamClaimBorder2;
             }
 
@@ -222,7 +222,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getYellowTeam().setHome(player.getLocation().clone());
+                arena.getYellowTeam().setHome(player.getLocation().getBlock().getLocation().clone());
                 return setYellowTeamClaimBorder1;
             }
 
@@ -239,7 +239,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getGreenTeam().setSellShop(player.getLocation().clone());
+                arena.getGreenTeam().setSellShop(player.getLocation().getBlock().getLocation().clone());
                 return setYellowTeamHome;
             }
 
@@ -255,7 +255,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getGreenTeam().setEquipmentShop(player.getLocation().clone());
+                arena.getGreenTeam().setEquipmentShop(player.getLocation().getBlock().getLocation().clone());
                 return setGreenTeamSellShop;
             }
 
@@ -271,7 +271,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getGreenTeam().setBlockShop(player.getLocation().clone());
+                arena.getGreenTeam().setBlockShop(player.getLocation().getBlock().getLocation().clone());
                 return setGreenTeamEquipmentShop;
             }
 
@@ -287,7 +287,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getGreenTeam().setClaimBorder2(player.getLocation().clone());
+                arena.getGreenTeam().setClaimBorder2(player.getLocation().getBlock().getLocation().clone());
                 return setGreenTeamBlockShop;
             }
 
@@ -303,7 +303,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getGreenTeam().setClaimBorder1(player.getLocation().clone());
+                arena.getGreenTeam().setClaimBorder1(player.getLocation().getBlock().getLocation().clone());
                 return setGreenTeamClaimBorder2;
             }
 
@@ -319,7 +319,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getGreenTeam().setHome(player.getLocation().clone());
+                arena.getGreenTeam().setHome(player.getLocation().getBlock().getLocation().clone());
                 return setGreenTeamClaimBorder1;
             }
 
@@ -336,7 +336,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getBlueTeam().setSellShop(player.getLocation().clone());
+                arena.getBlueTeam().setSellShop(player.getLocation().getBlock().getLocation().clone());
                 return setGreenTeamHome;
             }
 
@@ -352,7 +352,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getBlueTeam().setEquipmentShop(player.getLocation().clone());
+                arena.getBlueTeam().setEquipmentShop(player.getLocation().getBlock().getLocation().clone());
                 return setBlueTeamSellShop;
             }
 
@@ -368,7 +368,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getBlueTeam().setBlockShop(player.getLocation().clone());
+                arena.getBlueTeam().setBlockShop(player.getLocation().getBlock().getLocation().clone());
                 return setBlueTeamEquipmentShop;
             }
 
@@ -384,7 +384,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getBlueTeam().setClaimBorder2(player.getLocation().clone());
+                arena.getBlueTeam().setClaimBorder2(player.getLocation().getBlock().getLocation().clone());
                 return setBlueTeamBlockShop;
             }
 
@@ -400,7 +400,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getBlueTeam().setClaimBorder1(player.getLocation().clone());
+                arena.getBlueTeam().setClaimBorder1(player.getLocation().getBlock().getLocation().clone());
                 return setBlueTeamClaimBorder2;
             }
 
@@ -416,7 +416,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getBlueTeam().setHome(player.getLocation().clone());
+                arena.getBlueTeam().setHome(player.getLocation().getBlock().getLocation().clone());
                 return setBlueTeamClaimBorder1;
             }
 
@@ -433,7 +433,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getRedTeam().setSellShop(player.getLocation().clone());
+                arena.getRedTeam().setSellShop(player.getLocation().getBlock().getLocation().clone());
                 return setBlueTeamHome;
             }
 
@@ -449,7 +449,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getRedTeam().setEquipmentShop(player.getLocation().clone());
+                arena.getRedTeam().setEquipmentShop(player.getLocation().getBlock().getLocation().clone());
                 return setRedTeamSellShop;
             }
 
@@ -465,7 +465,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getRedTeam().setBlockShop(player.getLocation().clone());
+                arena.getRedTeam().setBlockShop(player.getLocation().getBlock().getLocation().clone());
                 return setRedTeamEquipmentShop;
             }
 
@@ -481,7 +481,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getRedTeam().setClaimBorder2(player.getLocation().clone());
+                arena.getRedTeam().setClaimBorder2(player.getLocation().getBlock().getLocation().clone());
                 return setRedTeamBlockShop;
             }
 
@@ -497,7 +497,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getRedTeam().setClaimBorder1(player.getLocation().clone());
+                arena.getRedTeam().setClaimBorder1(player.getLocation().getBlock().getLocation().clone());
                 return setRedTeamClaimBorder2;
             }
 
@@ -513,7 +513,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getRedTeam().setHome(player.getLocation().clone());
+                arena.getRedTeam().setHome(player.getLocation().getBlock().getLocation().clone());
                 return setRedTeamClaimBorder1;
             }
 
@@ -529,7 +529,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.setBorder2(player.getLocation().clone());
+                arena.setBorder2(player.getLocation().getBlock().getLocation().clone());
                 return setRedTeamHome;
             }
 
@@ -545,8 +545,8 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.setBorder1(player.getLocation().clone());
-                arena.setWorld(player.getLocation().clone().getWorld());
+                arena.setBorder1(player.getLocation().getBlock().getLocation().clone());
+                arena.setWorld(player.getLocation().getBlock().getLocation().clone().getWorld());
                 return setArenaBorder2;
             }
 

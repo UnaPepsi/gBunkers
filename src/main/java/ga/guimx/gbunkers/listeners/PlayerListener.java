@@ -8,10 +8,12 @@ import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.utils.*;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -64,17 +66,66 @@ public class PlayerListener implements Listener, ApolloListener {
 
     @EventHandler
     void onBlockInteract(PlayerInteractEvent event){
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.LEFT_CLICK_BLOCK) return;
+        if (event.getClickedBlock() == null) return;
+        Chat.bukkitSend("1");
         Player player = event.getPlayer();
-        if (PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+        if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+        Chat.bukkitSend("2");
+        event.setUseInteractedBlock(Event.Result.DENY);
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
+            Chat.bukkitSend("3");
             map.values().forEach(team -> {
+                Chat.bukkitSend("4");
                 Arena.Team arenaTeam = arena.getTeams().get(team.getColor().name().toLowerCase());
-                if (!LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) ||
-                        (!team.getMembers().contains(player) || team.getDtr() > 0 )){
-                    event.setCancelled(true);
+                if (LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) &&
+                    (team.getMembers().contains(player) || team.getDtr() <= 0)){
+                    event.setUseInteractedBlock(Event.Result.ALLOW);
+                    player.sendMessage(team.getColor()+"si");
+                }else{
+                    player.sendMessage(team.getColor()+"no");
                 }
+                //if (!LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) &&
+                //        (!team.getMembers().contains(player) || team.getDtr() > 0 )){
+                //    event.setUseInteractedBlock(Event.Result.DENY);
+                //    player.sendMessage("dsasd");
+                //    //event.setCancelled(true);
+                //}else{
+                //    player.sendMessage("else");
+                //}
             });
         });
+    }
+    @EventHandler
+    void onBlockBreak(BlockBreakEvent event){
+        if (!PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId())){
+            return;
+        }
+        short moneyToGive;
+        switch (event.getBlock().getType()){
+            case IRON_ORE:
+                moneyToGive = 30;
+                break;
+            case COAL_ORE:
+                moneyToGive = 20;
+                break;
+            case GOLD_ORE:
+                moneyToGive = 100;
+                break;
+            case DIAMOND_ORE:
+            case EMERALD_ORE:
+                moneyToGive = 300;
+                break;
+            default:
+                return;
+        }
+        event.setCancelled(true);
+        PlayerInfo.getPlayersBalance().put(event.getPlayer(),
+                PlayerInfo.getPlayersBalance().get(event.getPlayer())+moneyToGive);
+
+        Material originalBlockType = event.getBlock().getType();
+        event.getBlock().setType(Material.COBBLESTONE);
+        Task.runLater(task -> {
+            event.getBlock().setType(originalBlockType);
+        },20*5);
     }
 }

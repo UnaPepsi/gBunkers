@@ -10,12 +10,12 @@ import ga.guimx.gbunkers.commands.QueueCommand;
 import ga.guimx.gbunkers.commands.TestCommand;
 import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
+import ga.guimx.gbunkers.listeners.EntityListener;
 import ga.guimx.gbunkers.listeners.JoinLeaveQueueListener;
 import ga.guimx.gbunkers.listeners.PlayerListener;
 import ga.guimx.gbunkers.utils.*;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -51,6 +51,7 @@ public class GBunkers extends JavaPlugin {
         }
         PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
+        Chat.bukkitSend(ChatColor.valueOf("RED")+"asd");
         checkForUpdates();
     }
 
@@ -63,6 +64,7 @@ public class GBunkers extends JavaPlugin {
     void enableListeners(){
         getServer().getPluginManager().registerEvents(playerListener,this);
         getServer().getPluginManager().registerEvents(new JoinLeaveQueueListener(),this);
+        getServer().getPluginManager().registerEvents(new EntityListener(),this);
     }
     void checkForUpdates(){
         Task.runAsync(c -> {
