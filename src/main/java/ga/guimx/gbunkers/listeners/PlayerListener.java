@@ -7,18 +7,19 @@ import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.utils.*;
+import ga.guimx.gbunkers.utils.guis.SellShop;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
@@ -100,32 +101,48 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId())){
             return;
         }
-        short moneyToGive;
         switch (event.getBlock().getType()){
             case IRON_ORE:
-                moneyToGive = 30;
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.IRON_INGOT));
                 break;
             case COAL_ORE:
-                moneyToGive = 20;
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.COAL));
                 break;
             case GOLD_ORE:
-                moneyToGive = 100;
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.GOLD_INGOT));
                 break;
             case DIAMOND_ORE:
-            case EMERALD_ORE:
-                moneyToGive = 300;
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.DIAMOND));
                 break;
+            case EMERALD_ORE:
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.EMERALD));
+                break;
+            case COBBLESTONE:
+                event.setCancelled(true);
+                return;
             default:
                 return;
         }
         event.setCancelled(true);
-        PlayerInfo.getPlayersBalance().put(event.getPlayer(),
-                PlayerInfo.getPlayersBalance().get(event.getPlayer())+moneyToGive);
-
         Material originalBlockType = event.getBlock().getType();
         event.getBlock().setType(Material.COBBLESTONE);
         Task.runLater(task -> {
             event.getBlock().setType(originalBlockType);
         },20*5);
+    }
+
+    @EventHandler
+    void onEntityInteract(PlayerInteractEntityEvent event){
+        Entity who = event.getRightClicked();
+        if (who.getType() != EntityType.VILLAGER){
+            return;
+        }
+        event.setCancelled(true);
+        switch (who.getCustomName().substring(2)){
+            case "Sell Shop":
+                new SellShop(event.getPlayer()).open();
+        }
+        System.out.println(who.getCustomName());
+        System.out.println(who.getCustomName().substring(2)+"xd");
     }
 }

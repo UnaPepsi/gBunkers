@@ -16,6 +16,7 @@ import ga.guimx.gbunkers.listeners.PlayerListener;
 import ga.guimx.gbunkers.utils.*;
 import lombok.Getter;
 import lombok.Setter;
+import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -50,6 +51,7 @@ public class GBunkers extends JavaPlugin {
             PAPIHook.registerHook();
         }
         PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
+        new InventoryAPI(this).init();
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
         Chat.bukkitSend(ChatColor.valueOf("RED")+"asd");
         checkForUpdates();

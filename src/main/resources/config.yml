@@ -10,6 +10,12 @@ lobby:
 lobby_items:
   not_queued: INK_SACK:8
   queued: INK_SACK:10
+money_ores:
+  COAL: 20
+  IRON_INGOT: 30
+  GOLD_INGOT: 100
+  DIAMOND: 300
+  EMERALD: 300
 messages:
   plugin_enabled: "&ahas been enabled :D!"
   plugin_disabled: "&chas been disabled, bye!"

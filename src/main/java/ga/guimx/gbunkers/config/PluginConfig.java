@@ -1,5 +1,6 @@
 package ga.guimx.gbunkers.config;
 
+import com.google.common.collect.Maps;
 import ga.guimx.gbunkers.GBunkers;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -11,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PluginConfig {
     @Getter
@@ -25,6 +27,8 @@ public class PluginConfig {
     private static HashMap<String,ItemStack> lobbyInventory = new HashMap<>();
     @Getter
     private static List<String> scoreboard;
+    @Getter
+    private static Map<Material,Integer> moneyFromOres = Maps.newHashMap();
     public void load(){
         file = new File(GBunkers.getInstance().getDataFolder(),"config.yml");
         if (!file.exists()){
@@ -73,6 +77,7 @@ public class PluginConfig {
             lobbyInventory.put(key, new ItemStack(Material.valueOf(t[0]),1,Byte.parseByte(t[1])));
         });
         scoreboard = config.getStringList("scoreboard");
+        config.getConfigurationSection("money_ores").getKeys(false).forEach(key -> moneyFromOres.put(Material.valueOf(key),config.getInt("money_ores."+key)));
     }
     public static void setLobbyLocation(Location location){
         instance.config.set("lobby.world",location.getWorld());
