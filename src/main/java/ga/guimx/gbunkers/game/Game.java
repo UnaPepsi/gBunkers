@@ -167,4 +167,14 @@ public class Game {
             },0,1);
         });
     }
+    public static void unHidePlayers(List<Player> players){
+        for (Player player : players) {
+            for (Player player1 : players) {
+                if (player1.getUniqueId().equals(player.getUniqueId())){
+                    continue;
+                }
+                player.showPlayer(player1);
+            }
+        }
+    }
 }

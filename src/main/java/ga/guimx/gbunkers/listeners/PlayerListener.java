@@ -7,6 +7,7 @@ import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.utils.*;
+import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -18,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 
@@ -141,8 +143,14 @@ public class PlayerListener implements Listener, ApolloListener {
         switch (who.getCustomName().substring(2)){
             case "Sell Shop":
                 new SellShop(event.getPlayer()).open();
+                break;
+            case "Equipment Shop":
+                new EquipmentShop(event.getPlayer()).open();
+                break;
         }
-        System.out.println(who.getCustomName());
-        System.out.println(who.getCustomName().substring(2)+"xd");
+    }
+    @EventHandler
+    void onCraft(CraftItemEvent event){
+        event.setCancelled(true);
     }
 }
