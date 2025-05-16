@@ -8,10 +8,14 @@ import dev.rollczi.litecommands.annotations.permission.Permission;
 import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.game.Game;
+import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import java.awt.*;
 
@@ -54,4 +58,21 @@ public class TestCommand {
     void startGame(@Context Player sender){
         Game.startGame(ArenasConfig.getArenas().get(0));
     }
+    @Execute(name="hide")
+    void toggleHide(@Context Player sender, @Arg Player target){
+        if (target.canSee(sender)){
+            target.hidePlayer(sender);
+            sender.sendMessage(Chat.transNoPrefix("hid"));
+        }else{
+            target.showPlayer(sender);
+            sender.sendMessage(Chat.transNoPrefix("shown"));
+        }
+        ItemStack item = new ItemStack(Material.LEATHER_HELMET);
+        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
+        NamedTextColor color = NamedTextColor.NAMES.value("red");
+        meta.setColor(org.bukkit.Color.fromRGB(color.red(),color.green(),color.blue()));
+        item.setItemMeta(meta);
+        sender.getInventory().addItem(item);
+    }
+
 }

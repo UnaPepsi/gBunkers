@@ -1,0 +1,94 @@
+sell-shop:
+  title: "Sell Shop"
+  row: 3
+  icons:
+    filler-item:
+      material: STAINED_GLASS_PANE
+      display-name: "&7 "
+      durability: 7
+      slot: 0-26
+    coal:
+      material: COAL
+      display-name: "&aCoal $20"
+      slot: 11
+    iron:
+      material: IRON_INGOT
+      display-name: "&aIron $30"
+      slot: 12
+    gold:
+      material: GOLD_INGOT
+      display-name: "&aGold $100"
+      slot: 13
+    diamond:
+      material: DIAMOND
+      display-name: "&aDiamond $300"
+      slot: 14
+    emerald:
+      material: EMERALD
+      display-name: "&aEmerald $300"
+      slot: 15
+equipment-shop:
+  title: "Equipment Shop"
+  row: 6
+  icons:
+    filler-item:
+      material: STAINED_GLASS_PANE
+      display-name: "&7 "
+      durability: 7
+      slot: 0-53
+    d-helmet:
+      material: DIAMOND_HELMET
+      display-name: "&a$200 Diamond Helmet"
+      slot: 10
+    d-chestplate:
+      material: DIAMOND_CHESTPLATE
+      display-name: "&a$300 Diamond Chestplate"
+      slot: 19
+    d-leggings:
+      material: DIAMOND_LEGGINGS
+      display-name: "&a$300 Diamond Leggings"
+      slot: 28
+    d-boots:
+      material: DIAMOND_BOOTS
+      display-name: "&a$200 Diamond Boots"
+      slot: 37
+    b-helmet:
+      material: GOLD_HELMET
+      display-name: "&a$200 Bard Helmet"
+      slot: 11
+    b-chestplate:
+      material: GOLD_CHESTPLATE
+      display-name: "&a$300 Bard Chestplate"
+      slot: 20
+    b-leggings:
+      material: GOLD_LEGGINGS
+      display-name: "&a$300 Bard Leggings"
+      slot: 29
+    b-boots:
+      material: GOLD_BOOTS
+      display-name: "&a$200 Bard Boots"
+      slot: 38
+    a-helmet:
+      material: LEATHER_HELMET
+      display-name: "&a$200 Archer Helmet"
+      slot: 12
+    a-chestplate:
+      material: LEATHER_CHESTPLATE
+      display-name: "&a$300 Archer Chestplate"
+      slot: 21
+    a-leggings:
+      material: LEATHER_LEGGINGS
+      display-name: "&a$300 Archer Leggings"
+      slot: 31
+    a-boots:
+      material: LEATHER_BOOTS
+      display-name: "&a$200 Archer Boots"
+      slot: 39
+    pick:
+      material: DIAMOND_PICKAXE
+      display_name: "&a$50 Diamond Pickaxe"
+      slot: 22
+    axe:
+      material: DIAMOND_AXE
+      display_name: "&a$50 Diamond Axe"
+      slot: 27

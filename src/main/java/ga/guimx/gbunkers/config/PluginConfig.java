@@ -29,6 +29,8 @@ public class PluginConfig {
     private static List<String> scoreboard;
     @Getter
     private static Map<Material,Integer> moneyFromOres = Maps.newHashMap();
+    @Getter
+    private static Map<String,Integer> shopPrices = Maps.newHashMap();
     public void load(){
         file = new File(GBunkers.getInstance().getDataFolder(),"config.yml");
         if (!file.exists()){
@@ -78,6 +80,7 @@ public class PluginConfig {
         });
         scoreboard = config.getStringList("scoreboard");
         config.getConfigurationSection("money_ores").getKeys(false).forEach(key -> moneyFromOres.put(Material.valueOf(key),config.getInt("money_ores."+key)));
+        config.getConfigurationSection("shop_prices").getKeys(false).forEach(key -> shopPrices.put(key,config.getInt("shop_prices."+key)));
     }
     public static void setLobbyLocation(Location location){
         instance.config.set("lobby.world",location.getWorld());

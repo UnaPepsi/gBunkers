@@ -1,5 +1,6 @@
 package ga.guimx.gbunkers.listeners;
 
+import com.google.common.collect.Lists;
 import com.lunarclient.apollo.Apollo;
 import com.lunarclient.apollo.event.ApolloListener;
 import com.lunarclient.apollo.event.Listen;
@@ -22,6 +23,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
+
+import java.util.List;
 
 public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
@@ -38,6 +43,10 @@ public class PlayerListener implements Listener, ApolloListener {
             player.teleport(PluginConfig.getLobbyLocation());
             //player.getInventory().setContents(PluginConfig.getLobbyInventory().values().toArray(new ItemStack[0]));
             player.getInventory().setItem(0,PluginConfig.getLobbyInventory().get("not_queued"));
+        }
+        if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) {
+            Scoreboard sc = player.getScoreboard();
+            sc.getTeams().forEach(t -> t.removePlayer(player));
         }
     }
 
@@ -70,22 +79,15 @@ public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
     void onBlockInteract(PlayerInteractEvent event){
         if (event.getClickedBlock() == null) return;
-        Chat.bukkitSend("1");
         Player player = event.getPlayer();
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
-        Chat.bukkitSend("2");
         event.setUseInteractedBlock(Event.Result.DENY);
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            Chat.bukkitSend("3");
             map.values().forEach(team -> {
-                Chat.bukkitSend("4");
                 Arena.Team arenaTeam = arena.getTeams().get(team.getColor().name().toLowerCase());
                 if (LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) &&
                     (team.getMembers().contains(player) || team.getDtr() <= 0)){
                     event.setUseInteractedBlock(Event.Result.ALLOW);
-                    player.sendMessage(team.getColor()+"si");
-                }else{
-                    player.sendMessage(team.getColor()+"no");
                 }
                 //if (!LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) &&
                 //        (!team.getMembers().contains(player) || team.getDtr() > 0 )){
@@ -152,5 +154,41 @@ public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
     void onCraft(CraftItemEvent event){
         event.setCancelled(true);
+    }
+    @EventHandler
+    void onWorldChange(PlayerPortalEvent event){event.setCancelled(PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId()));}
+    @EventHandler
+    void onInvisDrink(PlayerItemConsumeEvent event){
+        ItemStack item = event.getItem();
+        Player player = event.getPlayer();
+        List<Player> playersCantSeePlayer = Lists.newArrayList();
+        Task.runLater(r -> {
+            if (item.getType() != Material.POTION || !player.hasPotionEffect(PotionEffectType.INVISIBILITY) || !PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId())){
+                //Chat.bukkitSend("asdasds"+player.hasPotionEffect(PotionEffectType.INVISIBILITY));
+                return;
+            }
+            Task.runTimer(task -> {
+                if (!player.isOnline() || !player.hasPotionEffect(PotionEffectType.INVISIBILITY)){
+                    playersCantSeePlayer.forEach(p -> p.showPlayer(player));
+                    task.cancel();
+                    return;
+                }
+                ArenaInfo.getArenasInUse().forEach((arena,map) -> {
+                    map.values().forEach(team -> {
+                        if (!team.getMembers().contains(player)){
+                            team.getMembers().forEach(p -> {
+                                if (p.getLocation().distance(player.getLocation()) > 5) {
+                                    p.hidePlayer(player);
+                                    playersCantSeePlayer.add(p);
+                                }else{
+                                    p.showPlayer(player);
+                                    playersCantSeePlayer.remove(p);
+                                }
+                            });
+                        }
+                    });
+                });
+            },0,2);
+        },1);
     }
 }

@@ -16,6 +16,19 @@ money_ores:
   GOLD_INGOT: 100
   DIAMOND: 300
   EMERALD: 300
+shop_prices:
+  d-helmet: 200
+  d-chestplate: 300
+  d-leggings: 300
+  d-boots: 200
+  b-helmet: 200
+  b-chestplate: 300
+  b-leggings: 300
+  b-boots: 200
+  a-helmet: 200
+  a-chestplate: 300
+  a-leggings: 300
+  a-boots: 200
 messages:
   plugin_enabled: "&ahas been enabled :D!"
   plugin_disabled: "&chas been disabled, bye!"

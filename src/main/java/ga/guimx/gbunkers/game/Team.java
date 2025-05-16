@@ -70,7 +70,19 @@ public class Team {
                         .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
                         .collect(Collectors.toList())
         );
-
+        //using scoreboards makes the player nametag visible with invis so imma use lunar api
+        //opponents
+        for (Player player : members){
+            Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(Recipients.ofEveryone(),player.getUniqueId(), Nametag.builder()
+                    .lines(Lists.newArrayList(
+                            Component.text()
+                                    .content(player.getDisplayName())
+                                    .color(NamedTextColor.NAMES.value(color.name().toLowerCase()))
+                                    .build()
+                    ))
+                    .build());
+        }
+        //teammates
         for (Player player : members){
             Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients,player.getUniqueId(), Nametag.builder()
                             .lines(Lists.newArrayList(

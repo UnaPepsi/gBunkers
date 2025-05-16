@@ -62,8 +62,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.hamza-cskn.obliviate-invs</groupId>
-            <artifactId>core</artifactId>
+            <groupId>com.github.hamza-cskn</groupId>
+            <artifactId>obliviate-invs</artifactId>
             <version>4.3.0</version>
         </dependency>
         <dependency>

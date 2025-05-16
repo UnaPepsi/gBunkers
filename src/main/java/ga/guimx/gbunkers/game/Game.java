@@ -7,17 +7,16 @@ import com.lunarclient.apollo.module.waypoint.Waypoint;
 import com.lunarclient.apollo.module.waypoint.WaypointModule;
 import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.utils.Arena;
-import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import java.awt.*;
@@ -44,6 +43,7 @@ public class Game {
             teams.get(color).getMembers().add(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)));
             PlayerInfo.getPlayersInGame().add(PlayerInfo.getPlayersQueued().get(i));
             PlayerInfo.getPlayersBalance().put(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)),0);
+            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).setGameMode(GameMode.SURVIVAL);
         }
         giveMoneyToPlayers(playersInQueue);
         ArenaInfo.getArenasInUse().put(arena,teams);
@@ -53,44 +53,24 @@ public class Game {
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getRedTeam().getHome());
-                    p.setDisplayName(ChatColor.RED+p.getName());
-                    Scoreboard sc = p.getScoreboard();
-                    org.bukkit.scoreboard.Team team = sc.getTeam("RED") == null ? sc.registerNewTeam("RED") : sc.getTeam("RED");
-                    team.setPrefix("§c");
-                    team.addPlayer(p);
                 });
         teams.get(ChatColor.BLUE)
                 .setDtr(teams.get(ChatColor.BLUE).getMembers().size())
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getBlueTeam().getHome());
-                    p.setDisplayName(ChatColor.BLUE+p.getName());
-                    Scoreboard sc = p.getScoreboard();
-                    org.bukkit.scoreboard.Team team = sc.getTeam("BLUE") == null ? sc.registerNewTeam("BLUE") : sc.getTeam("BLUE");
-                    team.setPrefix("§9");
-                    team.addPlayer(p);
                 });
         teams.get(ChatColor.GREEN)
                 .setDtr(teams.get(ChatColor.GREEN).getMembers().size())
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getGreenTeam().getHome());
-                    p.setDisplayName(ChatColor.GREEN+p.getName());
-                    Scoreboard sc = p.getScoreboard();
-                    org.bukkit.scoreboard.Team team = sc.getTeam("GREEN") == null ? sc.registerNewTeam("GREEN") : sc.getTeam("GREEN");
-                    team.setPrefix("§a");
-                    team.addPlayer(p);
                 });
         teams.get(ChatColor.YELLOW)
                 .setDtr(teams.get(ChatColor.YELLOW).getMembers().size())
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getYellowTeam().getHome());
-                    p.setDisplayName(ChatColor.YELLOW+p.getName());
-                    Scoreboard sc = p.getScoreboard();
-                    org.bukkit.scoreboard.Team team = sc.getTeam("YELLOW") == null ? sc.registerNewTeam("YELLOW") : sc.getTeam("YELLOW");
-                    team.setPrefix("§e");
-                    team.addPlayer(p);
                 });
         applyWaypoints(arena,playersInQueue);
         spawnVillagers(arena);
@@ -140,21 +120,17 @@ public class Game {
     }
 
     public static void spawnVillagers(Arena arena){
-        Chat.bukkitSend("spawnVillagers called!");
         arena.getTeams().forEach((color,team) -> {
-            Chat.bukkitSend("spawnVillagers 1");
             Villager blockshop = team.getBlockShop().getWorld().spawn(team.getBlockShop(), Villager.class);
             blockshop.setAdult();
             blockshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
             blockshop.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,100000,10));
             blockshop.setCustomName(ChatColor.valueOf(color.toUpperCase())+"Block Shop");
-            Chat.bukkitSend("spawnVillagers 2");
             Villager sellshop = team.getSellShop().getWorld().spawn(team.getSellShop(), Villager.class);
             sellshop.setAdult();
             sellshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
             sellshop.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,100000,10));
             sellshop.setCustomName(ChatColor.valueOf(color.toUpperCase())+"Sell Shop");
-            Chat.bukkitSend("spawnVillagers 3");
             Villager equipmentshop = team.getEquipmentShop().getWorld().spawn(team.getEquipmentShop(), Villager.class);
             equipmentshop.setAdult();
             equipmentshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
@@ -167,14 +143,5 @@ public class Game {
             },0,1);
         });
     }
-    public static void unHidePlayers(List<Player> players){
-        for (Player player : players) {
-            for (Player player1 : players) {
-                if (player1.getUniqueId().equals(player.getUniqueId())){
-                    continue;
-                }
-                player.showPlayer(player1);
-            }
-        }
-    }
+
 }

@@ -17,11 +17,15 @@ import ga.guimx.gbunkers.utils.*;
 import lombok.Getter;
 import lombok.Setter;
 import mc.obliviate.inventory.InventoryAPI;
+import mc.obliviate.inventory.configurable.ConfigurableGuiCache;
+import mc.obliviate.inventory.configurable.GuiConfigurationTable;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
 
 public class GBunkers extends JavaPlugin {
@@ -49,11 +53,11 @@ public class GBunkers extends JavaPlugin {
         enableListeners();
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
             PAPIHook.registerHook();
+            Chat.bukkitSend("Hooked to PlaceholderAPI");
         }
         PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
-        new InventoryAPI(this).init();
+        customGuiConfig();
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
-        Chat.bukkitSend(ChatColor.valueOf("RED")+"asd");
         checkForUpdates();
     }
 
@@ -82,5 +86,16 @@ public class GBunkers extends JavaPlugin {
                 getLogger().warning("gBunkers couldn't get the latest version of the plugin");
             }
         });
+    }
+    void customGuiConfig(){
+        new InventoryAPI(this).init();
+        ConfigurableGuiCache.resetCaches();
+        File file = new File(getDataFolder(), "villager-gui.yml");
+        if (!file.exists()) GBunkers.getInstance().saveResource("villager-gui.yml",false);
+        FileConfiguration villagerGui = YamlConfiguration.loadConfiguration(file);
+        GuiConfigurationTable.setDefaultConfigurationTable(new GuiConfigurationTable(villagerGui));
+    }
+    void deleteTeams(){
+
     }
 }
