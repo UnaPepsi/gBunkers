@@ -39,6 +39,8 @@ public class SellShop extends ConfigurableGui {
         );
         if (amount > 0){
             player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
+        }else{
+            player.playSound(player.getLocation(), Sound.VILLAGER_NO,1,1);
         }
     }
 }

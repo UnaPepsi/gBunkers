@@ -22,11 +22,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
@@ -167,9 +172,12 @@ public class PlayerListener implements Listener, ApolloListener {
                 //Chat.bukkitSend("asdasds"+player.hasPotionEffect(PotionEffectType.INVISIBILITY));
                 return;
             }
+            //player **should** only be in 1 team
+            player.getScoreboard().getTeams().stream().collect(Collectors.toList()).getFirst().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
             Task.runTimer(task -> {
                 if (!player.isOnline() || !player.hasPotionEffect(PotionEffectType.INVISIBILITY)){
                     playersCantSeePlayer.forEach(p -> p.showPlayer(player));
+                    player.getScoreboard().getTeams().stream().collect(Collectors.toList()).getFirst().setNameTagVisibility(NameTagVisibility.ALWAYS);
                     task.cancel();
                     return;
                 }
@@ -177,7 +185,7 @@ public class PlayerListener implements Listener, ApolloListener {
                     map.values().forEach(team -> {
                         if (!team.getMembers().contains(player)){
                             team.getMembers().forEach(p -> {
-                                if (p.getLocation().distance(player.getLocation()) > 5) {
+                                if (p.getLocation().distance(player.getLocation()) > 5 && Arrays.stream(player.getEquipment().getArmorContents()).allMatch(i -> i.getType() == Material.AIR)) {
                                     p.hidePlayer(player);
                                     playersCantSeePlayer.add(p);
                                 }else{
@@ -190,5 +198,13 @@ public class PlayerListener implements Listener, ApolloListener {
                 });
             },0,2);
         },1);
+        ItemMeta meta = item.getItemMeta();
+        if (meta.getItemFlags().contains(ItemFlag.HIDE_POTION_EFFECTS) && item.getType() == Material.POTION){
+            player.removePotionEffect(PotionEffectType.SLOW);
+            player.removePotionEffect(PotionEffectType.POISON);
+            meta.removeItemFlags(ItemFlag.values());
+            item.setItemMeta(meta);
+            item.setType(Material.GLASS_BOTTLE);
+        }
     }
 }

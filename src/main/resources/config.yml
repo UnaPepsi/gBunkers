@@ -29,6 +29,20 @@ shop_prices:
   a-chestplate: 300
   a-leggings: 300
   a-boots: 200
+  pick: 50
+  axe: 50
+  speed: 100
+  fres: 300
+  antidote: 500
+  heal: 50
+  slow: 100
+  poison: 100
+  invis: 1000
+  pearl: 50
+  bow: 300
+  sword: 150
+  archer-effects: 500
+  bard-effects: 500
 messages:
   plugin_enabled: "&ahas been enabled :D!"
   plugin_disabled: "&chas been disabled, bye!"

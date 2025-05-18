@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import java.awt.*;
@@ -53,24 +54,52 @@ public class Game {
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getRedTeam().getHome());
+                    Scoreboard sc = p.getScoreboard();
+                    p.setDisplayName(ChatColor.RED+p.getName());
+                    org.bukkit.scoreboard.Team team = sc.getTeam("RED") == null ? sc.registerNewTeam("RED") : sc.getTeam("RED");
+                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+                    team.setPrefix("§c");
+                    team.addPlayer(p);
+
                 });
         teams.get(ChatColor.BLUE)
                 .setDtr(teams.get(ChatColor.BLUE).getMembers().size())
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getBlueTeam().getHome());
+                    Scoreboard sc = p.getScoreboard();
+                    p.setDisplayName(ChatColor.BLUE+p.getName());
+                    org.bukkit.scoreboard.Team team = sc.getTeam("BLUE") == null ? sc.registerNewTeam("BLUE") : sc.getTeam("BLUE");
+                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+                    team.setPrefix("§9");
+                    team.addPlayer(p);
+
                 });
         teams.get(ChatColor.GREEN)
                 .setDtr(teams.get(ChatColor.GREEN).getMembers().size())
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getGreenTeam().getHome());
+                    Scoreboard sc = p.getScoreboard();
+                    p.setDisplayName(ChatColor.GREEN+p.getName());
+                    org.bukkit.scoreboard.Team team = sc.getTeam("GREEN") == null ? sc.registerNewTeam("GREEN") : sc.getTeam("GREEN");
+                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+                    team.setPrefix("§a");
+                    team.addPlayer(p);
+
                 });
         teams.get(ChatColor.YELLOW)
                 .setDtr(teams.get(ChatColor.YELLOW).getMembers().size())
                 .setTeamViewToMembers()
                 .setLunarNametags().getMembers().forEach(p -> {
                     p.teleport(arena.getYellowTeam().getHome());
+                    Scoreboard sc = p.getScoreboard();
+                    p.setDisplayName(ChatColor.YELLOW+p.getName());
+                    org.bukkit.scoreboard.Team team = sc.getTeam("YELLOW") == null ? sc.registerNewTeam("YELLOW") : sc.getTeam("YELLOW");
+                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+                    team.setPrefix("§e");
+                    team.addPlayer(p);
+
                 });
         applyWaypoints(arena,playersInQueue);
         spawnVillagers(arena);

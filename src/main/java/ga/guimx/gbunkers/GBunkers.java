@@ -20,10 +20,16 @@ import mc.obliviate.inventory.InventoryAPI;
 import mc.obliviate.inventory.configurable.ConfigurableGuiCache;
 import mc.obliviate.inventory.configurable.GuiConfigurationTable;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Team;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +44,7 @@ public class GBunkers extends JavaPlugin {
     private static final TeamManager teamManager = new TeamManager();
     private LiteCommands<CommandSender> liteCommands;
     private PlayerListener playerListener;
+    @Override
     public void onEnable(){
         instance = this;
         playerListener = new PlayerListener();
@@ -57,10 +64,16 @@ public class GBunkers extends JavaPlugin {
         }
         PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
         customGuiConfig();
+        deleteTeams();
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
         checkForUpdates();
+        ItemStack testitem = new ItemStack(Material.POTION);
+        PotionMeta meta = (PotionMeta) testitem.getItemMeta();
+        meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED,18000,1),true);
+        testitem.setItemMeta(meta);
+        testitem.serialize().forEach((k,v) -> System.out.println(k+"="+v+"|class="+v.getClass().getName()));
     }
-
+    @Override
     public void onDisable(){
         if (liteCommands != null){
             liteCommands.unregister();
@@ -96,6 +109,7 @@ public class GBunkers extends JavaPlugin {
         GuiConfigurationTable.setDefaultConfigurationTable(new GuiConfigurationTable(villagerGui));
     }
     void deleteTeams(){
-
+        Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(Team::unregister);
     }
+
 }

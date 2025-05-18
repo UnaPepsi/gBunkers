@@ -12,7 +12,9 @@ import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -74,5 +76,9 @@ public class TestCommand {
         item.setItemMeta(meta);
         sender.getInventory().addItem(item);
     }
-
+    @Execute(name="fstop")
+    void dumbStop(){
+        Bukkit.getWorld("world").getEntities().forEach(Entity::remove);
+        Bukkit.shutdown();
+    }
 }

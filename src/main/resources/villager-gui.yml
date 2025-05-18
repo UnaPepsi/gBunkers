@@ -79,16 +79,68 @@ equipment-shop:
     a-leggings:
       material: LEATHER_LEGGINGS
       display-name: "&a$300 Archer Leggings"
-      slot: 31
+      slot: 30
     a-boots:
       material: LEATHER_BOOTS
       display-name: "&a$200 Archer Boots"
       slot: 39
     pick:
       material: DIAMOND_PICKAXE
-      display_name: "&a$50 Diamond Pickaxe"
+      display-name: "&a$50 Diamond Pickaxe"
       slot: 22
     axe:
       material: DIAMOND_AXE
-      display_name: "&a$50 Diamond Axe"
-      slot: 27
+      display-name: "&a$50 Diamond Axe"
+      slot: 31
+    speed:
+      material: POTION
+      display-name: "&a$100 Speed Potion"
+      slot: 14
+    fres:
+      material: POTION
+      display-name: "&a$300 Fire Resistance Potion"
+      slot: 15
+    antidote:
+      material: POTION
+      display-name: "&a$500 Antidote"
+      slot: 16
+      item-flags:
+        - "HIDE_POTION_EFFECTS"
+    heal:
+      material: POTION
+      display-name: "&a$50 Instant Health (Right Click to fill)"
+      slot: 23
+    slow:
+      material: POTION
+      display-name: "&a$100 Slowness Potion"
+      slot: 24
+    poison:
+      material: POTION
+      display-name: "&a$100 Poison Potion"
+      slot: 25
+    invis:
+      material: POTION
+      display-name: "&a$1000 Invis Potion"
+      slot: 32
+    pearl:
+      material: ENDER_PEARL
+      display-name: "&a$50 Pearl (Right click for 16)"
+      slot: 33
+    bow:
+      material: BOW
+      display-name: "&a$300 Bow and Arrow (x64)"
+      slot: 34
+    sword:
+      material: DIAMOND_SWORD
+      display-name: "&a$150 Diamond Sword"
+      slot: 41
+    archer-effects:
+      material: SUGAR
+      display-name: "&a$500 Sugar and Feather (x15)"
+      amount: 15
+      slot: 42
+    bard-effects:
+      material: BLAZE_POWDER
+      display-name: "&a$500 Bard effects (x15)"
+      amount: 15
+      slot: 43
