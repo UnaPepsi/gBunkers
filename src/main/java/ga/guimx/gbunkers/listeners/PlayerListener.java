@@ -8,17 +8,22 @@ import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.utils.*;
+import ga.guimx.gbunkers.utils.guis.BlockShop;
+import ga.guimx.gbunkers.utils.guis.Enchanting;
 import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
@@ -85,7 +90,25 @@ public class PlayerListener implements Listener, ApolloListener {
     void onBlockInteract(PlayerInteractEvent event){
         if (event.getClickedBlock() == null) return;
         Player player = event.getPlayer();
+        ItemStack itemInHand = player.getItemInHand();
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+
+        if (event.getClickedBlock().getType() == Material.ANVIL && itemInHand != null && itemInHand.getType() != Material.AIR){
+            event.setCancelled(true);
+            if (PlayerInfo.getPlayersBalance().get(player) < itemInHand.getDurability()*2){
+                player.playSound(player.getLocation(), Sound.VILLAGER_NO,1,1);
+            }else{
+                PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)-itemInHand.getDurability()*2);
+                itemInHand.setDurability((short)0);
+                player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
+            }
+            return;
+        }else if (event.getClickedBlock().getType() == Material.ENCHANTMENT_TABLE){
+            event.setCancelled(true);
+            new Enchanting(player).open();
+            return;
+        }
+
         event.setUseInteractedBlock(Event.Result.DENY);
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
             map.values().forEach(team -> {
@@ -110,6 +133,7 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId())){
             return;
         }
+        event.setCancelled(!(PlayerInfo.getBlocksChanged().contains(event.getBlock().getLocation())));
         switch (event.getBlock().getType()){
             case IRON_ORE:
                 event.getPlayer().getInventory().addItem(new ItemStack(Material.IRON_INGOT));
@@ -126,18 +150,21 @@ public class PlayerListener implements Listener, ApolloListener {
             case EMERALD_ORE:
                 event.getPlayer().getInventory().addItem(new ItemStack(Material.EMERALD));
                 break;
-            case COBBLESTONE:
-                event.setCancelled(true);
-                return;
             default:
                 return;
         }
-        event.setCancelled(true);
         Material originalBlockType = event.getBlock().getType();
         event.getBlock().setType(Material.COBBLESTONE);
         Task.runLater(task -> {
             event.getBlock().setType(originalBlockType);
         },20*5);
+    }
+    @EventHandler(priority = EventPriority.HIGH)
+    void onBlockPlace(BlockPlaceEvent event){
+        if (event.isCancelled() || !PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId()) || PlayerInfo.getBlocksChanged().contains(event.getBlockPlaced().getLocation())){
+            return;
+        }
+        PlayerInfo.getBlocksChanged().add(event.getBlockPlaced().getLocation());
     }
 
     @EventHandler
@@ -153,6 +180,9 @@ public class PlayerListener implements Listener, ApolloListener {
                 break;
             case "Equipment Shop":
                 new EquipmentShop(event.getPlayer()).open();
+                break;
+            case "Block Shop":
+                new BlockShop(event.getPlayer()).open();
                 break;
         }
     }

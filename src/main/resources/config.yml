@@ -43,6 +43,14 @@ shop_prices:
   sword: 150
   archer-effects: 500
   bard-effects: 500
+  fence-gate: 10
+  spruce-fence-gate: 10
+  dark-oak-fence-gate: 10
+  cobblestone: 10
+  wood: 10
+  chest: 10
+  trapped-chest: 10
+  enchant: 300
 messages:
   plugin_enabled: "&ahas been enabled :D!"
   plugin_disabled: "&chas been disabled, bye!"

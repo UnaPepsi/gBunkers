@@ -144,3 +144,41 @@ equipment-shop:
       display-name: "&a$500 Bard effects (x15)"
       amount: 15
       slot: 43
+block-shop:
+  title: "Block Shop"
+  row: 3
+  icons:
+    filler-item:
+      material: STAINED_GLASS_PANE
+      display-name: "&7 "
+      durability: 7
+      slot: 0-26
+    fence-gate:
+      material: FENCE_GATE
+      display-name: "&a$10 Fence Gate (Right click for 64)"
+      slot: 10
+    spruce-fence-gate:
+      material: SPRUCE_FENCE_GATE
+      display-name: "&a$10 Spruce Fence Gate (Right click for 64)"
+      slot: 11
+    dark-oak-fence-gate:
+      material: DARK_OAK_FENCE_GATE
+      display-name: "&a$10 Dark Oak Fence Gate (Right click for 64)"
+      slot: 12
+    cobblestone:
+      material: COBBLESTONE
+      display-name: "&a$10 Cobblestone (Right click for 64)"
+      slot: 13
+    wood:
+      material: WOOD
+      display-name: "&a$10 Planks (Right click for 64)"
+      durability: 0
+      slot: 14
+    chest:
+      material: CHEST
+      display-name: "&a$10 Chest (Right click for 64)"
+      slot: 15
+    trapped-chest:
+      material: TRAPPED_CHEST
+      display-name: "&a$10 Trapped Chest (Right click for 64)"
+      slot: 16

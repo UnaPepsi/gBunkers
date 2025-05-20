@@ -13,8 +13,10 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
@@ -45,6 +47,8 @@ public class Game {
             PlayerInfo.getPlayersInGame().add(PlayerInfo.getPlayersQueued().get(i));
             PlayerInfo.getPlayersBalance().put(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)),0);
             Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).setGameMode(GameMode.SURVIVAL);
+            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).getInventory().clear();
+            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE),new ItemStack(Material.STONE_AXE)});
         }
         giveMoneyToPlayers(playersInQueue);
         ArenaInfo.getArenasInUse().put(arena,teams);
@@ -59,6 +63,7 @@ public class Game {
                     org.bukkit.scoreboard.Team team = sc.getTeam("RED") == null ? sc.registerNewTeam("RED") : sc.getTeam("RED");
                     //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
                     team.setPrefix("§c");
+                    team.setAllowFriendlyFire(false);
                     team.addPlayer(p);
 
                 });
@@ -72,6 +77,7 @@ public class Game {
                     org.bukkit.scoreboard.Team team = sc.getTeam("BLUE") == null ? sc.registerNewTeam("BLUE") : sc.getTeam("BLUE");
                     //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
                     team.setPrefix("§9");
+                    team.setAllowFriendlyFire(false);
                     team.addPlayer(p);
 
                 });
@@ -85,6 +91,7 @@ public class Game {
                     org.bukkit.scoreboard.Team team = sc.getTeam("GREEN") == null ? sc.registerNewTeam("GREEN") : sc.getTeam("GREEN");
                     //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
                     team.setPrefix("§a");
+                    team.setAllowFriendlyFire(false);
                     team.addPlayer(p);
 
                 });
@@ -98,6 +105,7 @@ public class Game {
                     org.bukkit.scoreboard.Team team = sc.getTeam("YELLOW") == null ? sc.registerNewTeam("YELLOW") : sc.getTeam("YELLOW");
                     //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
                     team.setPrefix("§e");
+                    team.setAllowFriendlyFire(false);
                     team.addPlayer(p);
 
                 });
