@@ -94,30 +94,32 @@ public class Enchanting extends Gui {
                 })
                 .onPut((clickEvent, itemStack) -> {
                     int moneyValue = PluginConfig.getShopPrices().get("enchant");
-                    int slotPos = 14;
-                    for (Enchantment enchantment : validItems.get(itemStack.getType())) {
-                        addItem(new Icon(enchantmentsItem.get(enchantment)).onClick(e -> {
-                            if (PlayerInfo.getPlayersBalance().get(player) < moneyValue){
-                                player.playSound(player.getLocation(),Sound.VILLAGER_NO,1,1);
-                                return;
+                    Task.runLater(VIVALAGRASAVIVANLOSMOMOSLAGRASAESCLAVELAGRASAESDIOS -> {
+                        int slotPos = 14;
+                        for (Enchantment enchantment : validItems.get(itemStack.getType())) {
+                            final int finalSlotPos = slotPos;
+                            if (itemStack.containsEnchantment(enchantment)){
+                                addItem(slotPos,barrier);
+                            }else{
+                                addItem(new Icon(enchantmentsItem.get(enchantment)).onClick(e -> {
+                                    if (PlayerInfo.getPlayersBalance().get(player) < moneyValue){
+                                        player.playSound(player.getLocation(),Sound.VILLAGER_NO,1,1);
+                                        return;
+                                    }
+                                    player.playSound(player.getLocation(),Sound.LEVEL_UP,1,1);
+                                    PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)-moneyValue);
+                                    itemStack.addEnchantment(enchantment,enchantments.get(enchantment));
+                                    addItem(finalSlotPos,barrier);
+                                }),slotPos);
                             }
-                            player.playSound(player.getLocation(),Sound.LEVEL_UP,1,1);
-                            PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)-moneyValue);
-                            itemStack.addEnchantment(enchantment,enchantments.get(enchantment));
-                        }),slotPos);
-                        slotPos++;
-                    }
-                }).onPickup((clickEvent,itemStack) -> {
-                    //ehh somewhat buggy
-                    Chat.bukkitSend(clickEvent.getSlot()+"|"+clickEvent.getClickedInventory().getItem(clickEvent.getSlot()));
-                        Task.runLater(ajsjdkasdkashkjdjasdkasjkdjqwukdyiashdukywu7qyhdu12th7uk6t678tds6utas6utxc7a65sd67ad6asd3as56d465123r56r56aser56ecxdsrdyatsdaghsfdghasfdghgwjkdhqjle -> {
-                            if (clickEvent.getClickedInventory().getItem(clickEvent.getSlot()) == null || clickEvent.getClickedInventory().getItem(clickEvent.getSlot()).getType() == Material.AIR) {
-                                addItem(14, barrier);
-                                addItem(15, barrier);
-                                addItem(16, barrier);
-                            }
-                        },1);
-                });
+                            slotPos++;
+                        }
+                    },2);
+                }).onPickup((clickEvent,itemStack) -> Task.runLater(ajsjdkasdkashkjdjasdkasjkdjqwukdyiashdukywu7qyhdu12th7uk6t678tds6utas6utxc7a65sd67ad6asd3as56d465123r56r56aser56ecxdsrdyatsdaghsfdghasfdghgwjkdhqjle -> {
+                    addItem(14, barrier);
+                    addItem(15, barrier);
+                    addItem(16, barrier);
+                },1));
         addItem(14,barrier);
         addItem(15,barrier);
         addItem(16,barrier);
