@@ -4,10 +4,7 @@ import com.lunarclient.apollo.event.EventBus;
 import dev.rollczi.litecommands.LiteCommands;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import dev.rollczi.litecommands.message.LiteMessages;
-import ga.guimx.gbunkers.commands.ArenaCommand;
-import ga.guimx.gbunkers.commands.LobbyCommand;
-import ga.guimx.gbunkers.commands.QueueCommand;
-import ga.guimx.gbunkers.commands.TestCommand;
+import ga.guimx.gbunkers.commands.*;
 import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.listeners.EntityListener;
@@ -52,9 +49,9 @@ public class GBunkers extends JavaPlugin {
         ArenasConfig.getInstance().load();
         EventBus.getBus().register(playerListener);
         liteCommands = LiteBukkitFactory.builder("gbunkers",this)
-                .commands(new TestCommand(), new QueueCommand(),new LobbyCommand(),new ArenaCommand())
+                .commands(new TestCommand(), new QueueCommand(),new LobbyCommand(),new ArenaCommand(), new FactionCommand())
                 .argument(Arena.class,new ArenaArgument())
-                .message(LiteMessages.MISSING_PERMISSIONS, permissions -> Chat.trans(PluginConfig.getMessages().get("no_permissions")
+                .message(LiteMessages.MISSING_PERMISSIONS, permissions -> Chat.transPrefix(PluginConfig.getMessages().get("no_permissions")
                         .replace("%missing_permissions%",permissions.asJoinedText())))
                 .build();
         enableListeners();
@@ -90,7 +87,7 @@ public class GBunkers extends JavaPlugin {
             try{
                 String newPossibleVersion = PluginUpdates.getLatestVersion();
                 if (!newPossibleVersion.equals(getDescription().getVersion())){
-                    Bukkit.getConsoleSender().sendMessage(Chat.trans(prefix + PluginConfig.getMessages().get("new_plugin_version_available")
+                    Bukkit.getConsoleSender().sendMessage(Chat.transPrefix(prefix + PluginConfig.getMessages().get("new_plugin_version_available")
                             .replace("%current_version%", getDescription().getVersion())
                             .replace("%new_version%", newPossibleVersion)
                             .replace("%repository%", "https://github.com/UnaPepsi/gBunkers/releases")));

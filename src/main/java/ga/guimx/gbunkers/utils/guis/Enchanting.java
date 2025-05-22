@@ -65,19 +65,19 @@ public class Enchanting extends Gui {
     public void onOpen(InventoryOpenEvent event){
         ItemStack barrier = new ItemStack(Material.BARRIER);
         ItemMeta barrierMeta = barrier.getItemMeta();
-        barrierMeta.setDisplayName(Chat.transNoPrefix("&7"));
+        barrierMeta.setDisplayName(Chat.trans("&7"));
         barrier.setItemMeta(barrierMeta);
         ItemStack grayGlass = new ItemStack(Material.STAINED_GLASS_PANE,1,(byte)7);
         ItemMeta grayGlassMeta = grayGlass.getItemMeta();
-        grayGlassMeta.setDisplayName(Chat.transNoPrefix("&7"));
+        grayGlassMeta.setDisplayName(Chat.trans("&7"));
         grayGlass.setItemMeta(grayGlassMeta);
         ItemStack enchantingTable = new ItemStack(Material.ENCHANTMENT_TABLE);
         ItemMeta enchantingTableMeta = enchantingTable.getItemMeta();
-        enchantingTableMeta.setDisplayName(Chat.transNoPrefix("&aEnchant!"));
+        enchantingTableMeta.setDisplayName(Chat.trans("&aEnchant!"));
         enchantingTable.setItemMeta(enchantingTableMeta);
         ItemStack greenGlass = new ItemStack(Material.STAINED_GLASS_PANE,1,(byte)5);
         ItemMeta greenGlassMeta = greenGlass.getItemMeta();
-        greenGlassMeta.setDisplayName(Chat.transNoPrefix("&7"));
+        greenGlassMeta.setDisplayName(Chat.trans("&7"));
         greenGlass.setItemMeta(greenGlassMeta);
         fillGui(new Icon(grayGlass));
         addItem(10,enchantingTable);

@@ -7,16 +7,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 public class Chat {
-    public static String trans(String string){
-        return transNoPrefix(GBunkers.getPrefix()+string);
+    public static String transPrefix(String string){
+        return trans(GBunkers.getPrefix()+string);
     }
-    public static String transNoPrefix(String string){
+    public static String trans(String string){
         return ChatColor.translateAlternateColorCodes('&',string);
     }
     public static Component toComponent(String string){
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(GBunkers.getPrefix()+string);
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(string);
+    }
+    public static Component toComponentPrefix(String string){
+        return toComponent(GBunkers.getPrefix()+string);
     }
     public static void bukkitSend(String string){
-        Bukkit.getConsoleSender().sendMessage(Chat.trans(string));
+        Bukkit.getConsoleSender().sendMessage(Chat.transPrefix(string));
     }
 }

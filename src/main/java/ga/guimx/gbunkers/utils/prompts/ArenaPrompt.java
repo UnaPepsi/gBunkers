@@ -34,7 +34,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_spectator_spawn"));
+                return Chat.trans(PluginConfig.getMessages().get("set_spectator_spawn"));
             }
         };
         Prompt setKothHighestCapzoneCorner = new FixedSetPrompt("done","cancel") {
@@ -50,7 +50,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_highest_capzone_corner"));
+                return Chat.trans(PluginConfig.getMessages().get("set_koth_highest_capzone_corner"));
             }
         };
         Prompt setKothLowestCapzoneCorner = new FixedSetPrompt("done","cancel") {
@@ -66,7 +66,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_lowest_capzone_corner"));
+                return Chat.trans(PluginConfig.getMessages().get("set_koth_lowest_capzone_corner"));
             }
         };
         Prompt setKothClaimCorner2 = new FixedSetPrompt("done","cancel") {
@@ -82,7 +82,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_claim_corner_2"));
+                return Chat.trans(PluginConfig.getMessages().get("set_koth_claim_corner_2"));
             }
         };
         Prompt setKothClaimCorner1 = new FixedSetPrompt("done","cancel") {
@@ -98,7 +98,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_claim_corner_1"));
+                return Chat.trans(PluginConfig.getMessages().get("set_koth_claim_corner_1"));
             }
         };
         Prompt setPearlsDisabled = new FixedSetPrompt("y","n","cancel") {
@@ -114,13 +114,13 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_pearls_disabled"));
+                return Chat.trans(PluginConfig.getMessages().get("set_koth_pearls_disabled"));
             }
         };
         Prompt setKothName = new StringPrompt() {
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_koth_name"));
+                return Chat.trans(PluginConfig.getMessages().get("set_koth_name"));
             }
 
             @Override
@@ -129,7 +129,7 @@ public class ArenaPrompt {
                     arena = null;
                     return Prompt.END_OF_CONVERSATION;
                 }
-                arena.getKoth().setName(Chat.transNoPrefix(s));
+                arena.getKoth().setName(Chat.trans(s));
                 return setPearlsDisabled;
             }
         };
@@ -148,7 +148,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&eYELLOW"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&eYELLOW"));
             }
         };
         Prompt setYellowTeamEquipmentShop = new FixedSetPrompt("done","cancel") {
@@ -164,7 +164,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&eYELLOW"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&eYELLOW"));
             }
         };
         Prompt setYellowTeamBlockShop = new FixedSetPrompt("done","cancel") {
@@ -180,7 +180,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&eYELLOW"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&eYELLOW"));
             }
         };
         Prompt setYellowTeamClaimBorder2 = new FixedSetPrompt("done","cancel") {
@@ -196,7 +196,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&eYELLOW"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&eYELLOW"));
             }
         };
         Prompt setYellowTeamClaimBorder1 = new FixedSetPrompt("done","cancel") {
@@ -212,7 +212,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&eYELLOW"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&eYELLOW"));
             }
         };
         Prompt setYellowTeamHome = new FixedSetPrompt("done","cancel") {
@@ -228,7 +228,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&eYELLOW"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_home").replace("%team%","&eYELLOW"));
             }
         };
         //GREEN
@@ -245,7 +245,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&aGREEN"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamEquipmentShop = new FixedSetPrompt("done","cancel") {
@@ -261,7 +261,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&aGREEN"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamBlockShop = new FixedSetPrompt("done","cancel") {
@@ -277,7 +277,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&aGREEN"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamClaimBorder2 = new FixedSetPrompt("done","cancel") {
@@ -293,7 +293,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&aGREEN"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamClaimBorder1 = new FixedSetPrompt("done","cancel") {
@@ -309,7 +309,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&aGREEN"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&aGREEN"));
             }
         };
         Prompt setGreenTeamHome = new FixedSetPrompt("done","cancel") {
@@ -325,7 +325,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&aGREEN"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_home").replace("%team%","&aGREEN"));
             }
         };
         //BLUE
@@ -342,7 +342,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&9BLUE"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&9BLUE"));
             }
         };
         Prompt setBlueTeamEquipmentShop = new FixedSetPrompt("done","cancel") {
@@ -358,7 +358,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&9BLUE"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&9BLUE"));
             }
         };
         Prompt setBlueTeamBlockShop = new FixedSetPrompt("done","cancel") {
@@ -374,7 +374,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&9BLUE"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&9BLUE"));
             }
         };
         Prompt setBlueTeamClaimBorder2 = new FixedSetPrompt("done","cancel") {
@@ -390,7 +390,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&9BLUE"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&9BLUE"));
             }
         };
         Prompt setBlueTeamClaimBorder1 = new FixedSetPrompt("done","cancel") {
@@ -406,7 +406,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&9BLUE"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&9BLUE"));
             }
         };
         Prompt setBlueTeamHome = new FixedSetPrompt("done","cancel") {
@@ -422,7 +422,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&9BLUE"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_home").replace("%team%","&9BLUE"));
             }
         };
         //RED
@@ -439,7 +439,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&cRED"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_sell_shop").replace("%team%","&cRED"));
             }
         };
         Prompt setRedTeamEquipmentShop = new FixedSetPrompt("done","cancel") {
@@ -455,7 +455,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&cRED"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_equipment_shop").replace("%team%","&cRED"));
             }
         };
         Prompt setRedTeamBlockShop = new FixedSetPrompt("done","cancel") {
@@ -471,7 +471,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&cRED"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_block_shop").replace("%team%","&cRED"));
             }
         };
         Prompt setRedTeamClaimBorder2 = new FixedSetPrompt("done","cancel") {
@@ -487,7 +487,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&cRED"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_2").replace("%team%","&cRED"));
             }
         };
         Prompt setRedTeamClaimBorder1 = new FixedSetPrompt("done","cancel") {
@@ -503,7 +503,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&cRED"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_claim_border_1").replace("%team%","&cRED"));
             }
         };
         Prompt setRedTeamHome = new FixedSetPrompt("done","cancel") {
@@ -519,7 +519,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_team_home").replace("%team%","&cRED"));
+                return Chat.trans(PluginConfig.getMessages().get("set_team_home").replace("%team%","&cRED"));
             }
         };
         Prompt setArenaBorder2 = new FixedSetPrompt("done","cancel") {
@@ -535,7 +535,7 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_arena_border_2"));
+                return Chat.trans(PluginConfig.getMessages().get("set_arena_border_2"));
             }
         };
         Prompt setArenaBorder1 = new FixedSetPrompt("done","cancel") {
@@ -552,13 +552,13 @@ public class ArenaPrompt {
 
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_arena_border_1"));
+                return Chat.trans(PluginConfig.getMessages().get("set_arena_border_1"));
             }
         };
         Prompt setName = new StringPrompt() {
             @Override
             public String getPromptText(ConversationContext conversationContext) {
-                return Chat.transNoPrefix(PluginConfig.getMessages().get("set_arena_name"));
+                return Chat.trans(PluginConfig.getMessages().get("set_arena_name"));
             }
 
             @Override
@@ -571,18 +571,18 @@ public class ArenaPrompt {
                 return setArenaBorder1;
             }
         };
-        player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("start_arena_setup")));
+        player.sendMessage(Chat.trans(PluginConfig.getMessages().get("start_arena_setup")));
         return factory.withFirstPrompt(setName).withModality(true).withLocalEcho(true).addConversationAbandonedListener(listener -> {
             if (arena == null){
                 return;
             }
             try {
                 ArenasConfig.getInstance().addArena(arena);
-                player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_creation_done").
+                player.sendMessage(Chat.trans(PluginConfig.getMessages().get("arena_creation_done").
                         replace("%arena_name%",arena.getName())));
             }catch (IllegalArgumentException | IOException ex){
                 ex.printStackTrace();
-                player.sendMessage(Chat.transNoPrefix(PluginConfig.getMessages().get("arena_conflict")));
+                player.sendMessage(Chat.trans(PluginConfig.getMessages().get("arena_conflict")));
             }
         }).buildConversation(player);
     }

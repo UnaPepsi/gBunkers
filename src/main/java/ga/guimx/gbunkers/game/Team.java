@@ -6,6 +6,7 @@ import com.lunarclient.apollo.module.nametag.Nametag;
 import com.lunarclient.apollo.module.nametag.NametagModule;
 import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.GBunkers;
+import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import lombok.Getter;
@@ -89,10 +90,7 @@ public class Team {
                                             .content(player.getDisplayName())
                                             .color(NamedTextColor.NAMES.value(color.name().toLowerCase()))
                                             .build(),
-                                    Component.text()
-                                            .content("[TEAM]")
-                                            .color(NamedTextColor.GREEN)
-                                            .build()
+                                    Chat.toComponent("&a[TEAM]")
                             ))
                     .build());
         }

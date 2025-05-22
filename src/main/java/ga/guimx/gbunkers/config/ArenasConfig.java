@@ -56,7 +56,7 @@ public class ArenasConfig {
             }
             World world = Bukkit.getWorld(config.getString(path+"world"));
             arenas.add(Arena.builder()
-                    .name(config.getString(path+"name"))
+                    .name(config.getConfigurationSection(key).getName())
                     .world(world)
                     .border1(new Location(world,
                             config.getDouble(path+"border_1.x"),
@@ -215,7 +215,7 @@ public class ArenasConfig {
                             .build()
                     )
                     .koth(Arena.Koth.builder()
-                            .name(Chat.transNoPrefix(config.getString(path+"koth.name")))
+                            .name(Chat.trans(config.getString(path+"koth.name")))
                             .claimBorder1(new Location(world,
                                     config.getDouble(path+"koth.claim_border_1.x"),
                                     0,

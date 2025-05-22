@@ -2,6 +2,7 @@ package ga.guimx.gbunkers.utils;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -19,4 +20,10 @@ public class PlayerInfo {
     private static final Map<Player,Integer> playersBalance = Maps.newHashMap();
     @Getter
     private static final List<Location> blocksChanged = new ArrayList<>();
+    @Getter
+    private static final Map<Arena,UUID> playersCappingKoth = Maps.newHashMap();
+    @Getter
+    private static final List<UUID> playersFHomming = new ArrayList<>();
+    @Getter
+    private static final Map<Player,ChatColor> playerLocation = Maps.newHashMap();
 }

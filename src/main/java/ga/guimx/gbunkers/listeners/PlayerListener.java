@@ -7,11 +7,13 @@ import com.lunarclient.apollo.event.Listen;
 import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
+import ga.guimx.gbunkers.game.Game;
 import ga.guimx.gbunkers.utils.*;
 import ga.guimx.gbunkers.utils.guis.BlockShop;
 import ga.guimx.gbunkers.utils.guis.Enchanting;
 import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -25,6 +27,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemFlag;
@@ -44,7 +47,7 @@ public class PlayerListener implements Listener, ApolloListener {
         Player player = event.getPlayer();
         Task.runLater(c -> {
             if (!Apollo.getPlayerManager().hasSupport(player.getUniqueId())){
-                player.sendMessage(Chat.trans(PluginConfig.getMessages().get("joined_without_lunar")));
+                player.sendMessage(Chat.transPrefix(PluginConfig.getMessages().get("joined_without_lunar")));
             }
         },20);
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
@@ -62,7 +65,7 @@ public class PlayerListener implements Listener, ApolloListener {
 
     @Listen
     void onJoin(ApolloRegisterPlayerEvent event){
-        event.getPlayer().sendMessage(Chat.toComponent(PluginConfig.getMessages().get("joined_with_lunar")));
+        event.getPlayer().sendMessage(Chat.toComponentPrefix(PluginConfig.getMessages().get("joined_with_lunar")));
     }
 
     @EventHandler
@@ -72,6 +75,7 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
             event.setCancelled(true);
         }
+        PlayerInfo.getPlayersFHomming().remove(player.getUniqueId());
     }
     @EventHandler
     void onDrop(PlayerDropItemEvent event){
@@ -236,5 +240,88 @@ public class PlayerListener implements Listener, ApolloListener {
             item.setItemMeta(meta);
             item.setType(Material.GLASS_BOTTLE);
         }
+    }
+    @EventHandler
+    void onDeath(PlayerDeathEvent event){
+        Player player = event.getEntity();
+        if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
+            return;
+        }
+        ArenaInfo.getArenasInUse().forEach((arena,map) ->{
+            map.values().stream().filter(team -> team.getMembers().contains(player)).forEach(team -> {
+                player.setGameMode(GameMode.SPECTATOR);
+                team.setDtr(team.getDtr() - 1);
+                if (team.getDtr() > 0) {
+                    Task.runLater(run -> {
+                        player.setGameMode(GameMode.SURVIVAL);
+                        player.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
+                        player.getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE), new ItemStack(Material.STONE_AXE)});
+                    }, 20 * 10);
+                }
+                if (team.getDtr() == 0) { //to avoid spamming the message when people are killed with < 0 dtr
+                    player.getWorld().getPlayers().forEach(p -> {
+                        p.sendMessage(Chat.transPrefix("&cTeam %color%%team% &cis raidable!"
+                                .replace("%color%", team.getColor().toString())
+                                .replace("%team%", team.getColor().name())));
+                    });
+                }
+            });
+        });
+    }
+    @EventHandler
+    void onMovement(PlayerMoveEvent event){
+        Player player = event.getPlayer();
+        if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+        if (
+                event.getFrom().getX() != event.getTo().getX() ||
+                event.getFrom().getY() != event.getTo().getY() ||
+                event.getFrom().getZ() != event.getTo().getZ()
+        ){
+            PlayerInfo.getPlayersFHomming().remove(player.getUniqueId());
+        }
+        ArenaInfo.getArenasInUse().forEach((arena,map) -> {
+            if (LocationCheck.isInside3D(player.getLocation(), arena.getKoth().getLowestCapzoneCorner(), arena.getKoth().getHighestCapzoneCorner())){
+                if (!PlayerInfo.getPlayersCappingKoth().containsKey(arena)){
+                    PlayerInfo.getPlayersCappingKoth().put(arena,player.getUniqueId());
+                    player.sendMessage(Chat.transPrefix("&aYou're now capping."));
+                    long startedAt = System.currentTimeMillis();
+                    Task.runTimer(task -> {
+                        if (!PlayerInfo.getPlayersCappingKoth().containsValue(player.getUniqueId())){
+                            Chat.bukkitSend("knocked");
+                            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.transPrefix("&e%player% &ehas been knocked".replace("%player%",player.getDisplayName()))));
+                            task.cancel();
+                            return;
+                        }
+                        long elapsed = System.currentTimeMillis() - startedAt;
+                        if (elapsed % 15000 < 50){
+                            Chat.bukkitSend(startedAt+"|"+System.currentTimeMillis()+"|"+(System.currentTimeMillis()-startedAt+"|"+Time.timePassedSecs(startedAt,System.currentTimeMillis())));
+                            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.transPrefix("&eSomeone is now capping (%timeCapped%)"
+                                    .replace("%timeCapped%",Time.formatSecs(Time.timePassedSecs(startedAt,System.currentTimeMillis()))))));
+                        }
+                        if (Time.timePassedSecs(startedAt,System.currentTimeMillis()) >= 60 * 6){
+                            Game.endGame(arena,player);
+                        }
+                    },0,1);
+                }
+            }else if (PlayerInfo.getPlayersCappingKoth().containsValue(player.getUniqueId())) {
+                PlayerInfo.getPlayersCappingKoth().remove(arena);
+                player.getNearbyEntities(20,10,20).stream().filter(e -> e instanceof Player && LocationCheck.isInside3D(e.getLocation(), arena.getKoth().getLowestCapzoneCorner(), arena.getKoth().getHighestCapzoneCorner())).findFirst().ifPresent(playerNowCapping -> {
+                    PlayerInfo.getPlayersCappingKoth().put(arena,playerNowCapping.getUniqueId());
+                    playerNowCapping.sendMessage(Chat.transPrefix("&aYou're now capping."));
+                    playerNowCapping.getWorld().getPlayers().forEach(p -> Chat.transPrefix("&e%player% &eis now capping".replace("%player%",((Player)playerNowCapping).getDisplayName())));
+                });
+            }else{
+                for (ChatColor color : map.keySet()) {
+                    Arena.Team team = arena.getTeams().get(color.name().toLowerCase());
+                    if (LocationCheck.isInside2D(player.getLocation(),team.getClaimBorder1(),team.getClaimBorder2()) && (!PlayerInfo.getPlayerLocation().containsKey(player) || !PlayerInfo.getPlayerLocation().get(player).equals(team.getColor()))){
+                        PlayerInfo.getPlayerLocation().put(player,team.getColor());
+                        player.sendMessage(Chat.trans("&eYou're entering %color%%team%&e's territory"
+                                .replace("%color%", color.toString())
+                                .replace("%team%",color.name())));
+                        break;
+                    }
+                }
+            }
+        });
     }
 }

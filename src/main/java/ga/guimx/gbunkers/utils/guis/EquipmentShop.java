@@ -47,7 +47,7 @@ public class EquipmentShop extends ConfigurableGui {
         addConfigIcon("speed",item -> handlePotion(item,PotionType.SPEED ,2,false,false)).onClick(e -> handleItem(e,"speed"));
         addConfigIcon("fres",item -> handlePotion(item,PotionType.FIRE_RESISTANCE,1,true,false)).onClick(e -> handleItem(e,"fres"));
         addConfigIcon("antidote",item -> handlePotion(item,PotionType.POISON, 1,false,false)).onClick(e -> handleItem(e,"antidote"));
-        addConfigIcon("heal",item -> handlePotion(item,PotionType.INSTANT_HEAL, 1,false,true)).onClick(e -> {
+        addConfigIcon("heal",item -> handlePotion(item,PotionType.INSTANT_HEAL, 2,false,true)).onClick(e -> {
             if (e.isRightClick()) {
                 for (ItemStack itemStack : player.getInventory()) {
                     if (itemStack == null || itemStack.getType() == Material.AIR) {

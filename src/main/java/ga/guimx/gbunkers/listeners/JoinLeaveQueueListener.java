@@ -20,12 +20,12 @@ public class JoinLeaveQueueListener implements Listener {
         }
         if (event.getMaterial() == PluginConfig.getLobbyInventory().get("not_queued").getType() && !PlayerInfo.getPlayersQueued().contains(player.getUniqueId())){
             PlayerInfo.getPlayersQueued().add(player.getUniqueId());
-            player.sendMessage(Chat.trans(PluginConfig.getMessages().get("joined_queue")));
+            player.sendMessage(Chat.transPrefix(PluginConfig.getMessages().get("joined_queue")));
             player.getInventory().clear();
             player.getInventory().setItem(0,PluginConfig.getLobbyInventory().get("queued"));
         }else if (event.getMaterial() == PluginConfig.getLobbyInventory().get("not_queued").getType() && PlayerInfo.getPlayersQueued().contains(player.getUniqueId())) {
             PlayerInfo.getPlayersQueued().remove(player.getUniqueId());
-            player.sendMessage(Chat.trans(PluginConfig.getMessages().get("left_queue")));
+            player.sendMessage(Chat.transPrefix(PluginConfig.getMessages().get("left_queue")));
             player.getInventory().clear();
             player.getInventory().setItem(0, PluginConfig.getLobbyInventory().get("not_queued"));
         }

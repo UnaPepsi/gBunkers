@@ -9,6 +9,7 @@ import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.game.Game;
 import ga.guimx.gbunkers.utils.Chat;
+import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import java.awt.*;
+import java.util.stream.Collectors;
 
 @Command(name = "test")
 @Permission("gbunkers.admin")
@@ -64,10 +66,10 @@ public class TestCommand {
     void toggleHide(@Context Player sender, @Arg Player target){
         if (target.canSee(sender)){
             target.hidePlayer(sender);
-            sender.sendMessage(Chat.transNoPrefix("hid"));
+            sender.sendMessage(Chat.trans("hid"));
         }else{
             target.showPlayer(sender);
-            sender.sendMessage(Chat.transNoPrefix("shown"));
+            sender.sendMessage(Chat.trans("shown"));
         }
         ItemStack item = new ItemStack(Material.LEATHER_HELMET);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
@@ -80,5 +82,12 @@ public class TestCommand {
     void dumbStop(){
         Bukkit.getWorld("world").getEntities().forEach(Entity::remove);
         Bukkit.shutdown();
+    }
+    @Execute(name="cappers")
+    void cappersCheck(@Context Player sender){
+        PlayerInfo.getPlayersCappingKoth().forEach((arena,uuid)->{
+            sender.sendMessage(arena.getName()+"|"+Bukkit.getPlayer(uuid).getDisplayName());
+        });
+        Chat.bukkitSend("asdasd"+sender.getWorld().getPlayers().stream().map(Player::getDisplayName).collect(Collectors.joining("', ")));
     }
 }

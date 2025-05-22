@@ -6,23 +6,25 @@ import com.lunarclient.apollo.BukkitApollo;
 import com.lunarclient.apollo.module.waypoint.Waypoint;
 import com.lunarclient.apollo.module.waypoint.WaypointModule;
 import com.lunarclient.apollo.recipients.Recipients;
+import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.utils.Arena;
+import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -181,4 +183,37 @@ public class Game {
         });
     }
 
+    public static void endGame(Arena arena, Player whoCapped){
+        //triple loop oh god
+        ArenaInfo.getArenasInUse().get(arena).forEach((c,team) -> {
+            team.removeTeamViewFromMembers();
+            Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(scoreboardTeam -> team.getMembers().forEach(scoreboardTeam::removePlayer));
+        });
+        PlayerInfo.getBlocksChanged().stream().filter(loc -> loc.getWorld().equals(arena.getWorld())).forEach(loc -> loc.getBlock().setType(Material.AIR));
+        arena.getWorld().getEntities().stream().filter(e -> e instanceof Villager).forEach(Entity::remove);
+        ArenaInfo.getArenasInUse().get(arena).values().stream().filter(team -> team.getMembers().contains(whoCapped)).findFirst().ifPresent(team -> {
+            Bukkit.broadcastMessage(Chat.trans("&aTeam %color%%team% (%members%) &awon a game!"
+                    .replace("%color%",team.getColor().toString())
+                    .replace("%team%",team.getColor().name())
+                    .replace("%members%", team.getMembers().stream().map(Player::getDisplayName).collect(Collectors.joining(", ")))));
+            team.getMembers().forEach(p -> {
+                for (int i = 0; i < 3; i++){
+                    Firework fw = p.getWorld().spawn(p.getLocation(), Firework.class);
+                    FireworkMeta fwm = fw.getFireworkMeta();
+                    fwm.setPower(2);
+                    fwm.addEffect(FireworkEffect.builder().withColor(org.bukkit.Color.LIME).withFade().withTrail().build());
+                    fw.setFireworkMeta(fwm);
+                    Task.runLater(t -> fw.detonate(),20*i);
+                }
+            });
+        });
+        arena.getWorld().getPlayers().forEach(p -> {
+            p.teleport(PluginConfig.getLobbyLocation());
+            PlayerInfo.getPlayersInGame().remove(p.getUniqueId());
+            PlayerInfo.getPlayersBalance().remove(p);
+            PlayerInfo.getPlayersBalance().remove(p);
+        });
+        PlayerInfo.getPlayersCappingKoth().remove(arena);
+        ArenaInfo.getArenasInUse().remove(arena);
+    }
 }
