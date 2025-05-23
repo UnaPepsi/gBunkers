@@ -144,16 +144,16 @@ public class Game {
     }
     public static void giveMoneyToPlayers(List<Player> players){
         Task.runTimer(task -> {
-            for (Player player : players) {
-                if (!PlayerInfo.getPlayersBalance().containsKey(player)){
-                    players.remove(player);
+            if (players.isEmpty()){
+                task.cancel();
+                return;
+            }
+            for (int i = 0; i < players.size(); i++) {
+                if (!PlayerInfo.getPlayersBalance().containsKey(players.get(i))){
+                    players.remove(players.get(i));
                     continue;
                 }
-                if (players.isEmpty()){
-                    task.cancel();
-                    return;
-                }
-                PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)+10);
+                PlayerInfo.getPlayersBalance().put(players.get(i),PlayerInfo.getPlayersBalance().get(players.get(i))+10);
             }
         },0,20*5);
     }
@@ -191,13 +191,19 @@ public class Game {
         });
         PlayerInfo.getBlocksChanged().stream().filter(loc -> loc.getWorld().equals(arena.getWorld())).forEach(loc -> loc.getBlock().setType(Material.AIR));
         arena.getWorld().getEntities().stream().filter(e -> e instanceof Villager).forEach(Entity::remove);
+        arena.getWorld().getPlayers().forEach(p -> {
+            p.teleport(PluginConfig.getLobbyLocation());
+            PlayerInfo.getPlayersInGame().remove(p.getUniqueId());
+            PlayerInfo.getPlayersBalance().remove(p);
+            p.setGameMode(GameMode.ADVENTURE);
+        });
         ArenaInfo.getArenasInUse().get(arena).values().stream().filter(team -> team.getMembers().contains(whoCapped)).findFirst().ifPresent(team -> {
             Bukkit.broadcastMessage(Chat.trans("&aTeam %color%%team% (%members%) &awon a game!"
                     .replace("%color%",team.getColor().toString())
                     .replace("%team%",team.getColor().name())
                     .replace("%members%", team.getMembers().stream().map(Player::getDisplayName).collect(Collectors.joining(", ")))));
             team.getMembers().forEach(p -> {
-                for (int i = 0; i < 3; i++){
+                for (int i = 1; i <= 10; i++){
                     Firework fw = p.getWorld().spawn(p.getLocation(), Firework.class);
                     FireworkMeta fwm = fw.getFireworkMeta();
                     fwm.setPower(2);
@@ -206,12 +212,6 @@ public class Game {
                     Task.runLater(t -> fw.detonate(),20*i);
                 }
             });
-        });
-        arena.getWorld().getPlayers().forEach(p -> {
-            p.teleport(PluginConfig.getLobbyLocation());
-            PlayerInfo.getPlayersInGame().remove(p.getUniqueId());
-            PlayerInfo.getPlayersBalance().remove(p);
-            PlayerInfo.getPlayersBalance().remove(p);
         });
         PlayerInfo.getPlayersCappingKoth().remove(arena);
         ArenaInfo.getArenasInUse().remove(arena);

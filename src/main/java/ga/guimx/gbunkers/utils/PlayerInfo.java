@@ -26,4 +26,6 @@ public class PlayerInfo {
     private static final List<UUID> playersFHomming = new ArrayList<>();
     @Getter
     private static final Map<Player,ChatColor> playerLocation = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Long> startedCappingAt = Maps.newHashMap();
 }

@@ -13,10 +13,7 @@ import ga.guimx.gbunkers.utils.guis.BlockShop;
 import ga.guimx.gbunkers.utils.guis.Enchanting;
 import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -39,6 +36,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class PlayerListener implements Listener, ApolloListener {
@@ -154,11 +152,18 @@ public class PlayerListener implements Listener, ApolloListener {
             case EMERALD_ORE:
                 event.getPlayer().getInventory().addItem(new ItemStack(Material.EMERALD));
                 break;
+            case WHEAT:
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.WHEAT,5));
+                break;
             default:
                 return;
         }
         Material originalBlockType = event.getBlock().getType();
-        event.getBlock().setType(Material.COBBLESTONE);
+        if (originalBlockType == Material.WHEAT){
+            event.getBlock().setType(Material.AIR);
+        }else{
+            event.getBlock().setType(Material.COBBLESTONE);
+        }
         Task.runLater(task -> {
             event.getBlock().setType(originalBlockType);
         },20*5);
@@ -247,24 +252,29 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
             return;
         }
+        Location deathLoc = player.getLocation().clone();
         ArenaInfo.getArenasInUse().forEach((arena,map) ->{
             map.values().stream().filter(team -> team.getMembers().contains(player)).forEach(team -> {
-                player.setGameMode(GameMode.SPECTATOR);
-                team.setDtr(team.getDtr() - 1);
-                if (team.getDtr() > 0) {
-                    Task.runLater(run -> {
-                        player.setGameMode(GameMode.SURVIVAL);
-                        player.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
-                        player.getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE), new ItemStack(Material.STONE_AXE)});
-                    }, 20 * 10);
-                }
-                if (team.getDtr() == 0) { //to avoid spamming the message when people are killed with < 0 dtr
-                    player.getWorld().getPlayers().forEach(p -> {
-                        p.sendMessage(Chat.transPrefix("&cTeam %color%%team% &cis raidable!"
-                                .replace("%color%", team.getColor().toString())
-                                .replace("%team%", team.getColor().name())));
-                    });
-                }
+                Task.runLater(task -> {
+                    player.spigot().respawn();
+                    player.setGameMode(GameMode.SPECTATOR);
+                    player.teleport(deathLoc);
+                    team.setDtr(team.getDtr() - 1);
+                    if (team.getDtr() > 0) {
+                        Task.runLater(run -> {
+                            player.setGameMode(GameMode.SURVIVAL);
+                            player.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
+                            player.getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE), new ItemStack(Material.STONE_AXE)});
+                        }, 20 * 10);
+                    }
+                    if (team.getDtr() == 0) { //to avoid spamming the message when people are killed with < 0 dtr
+                        player.getWorld().getPlayers().forEach(p -> {
+                            p.sendMessage(Chat.transPrefix("&cTeam %color%%team% &cis raidable!"
+                                    .replace("%color%", team.getColor().toString())
+                                    .replace("%team%", team.getColor().name())));
+                        });
+                    }
+                },1);
             });
         });
     }
@@ -285,6 +295,7 @@ public class PlayerListener implements Listener, ApolloListener {
                     PlayerInfo.getPlayersCappingKoth().put(arena,player.getUniqueId());
                     player.sendMessage(Chat.transPrefix("&aYou're now capping."));
                     long startedAt = System.currentTimeMillis();
+                    AtomicBoolean cd = new AtomicBoolean(false);
                     Task.runTimer(task -> {
                         if (!PlayerInfo.getPlayersCappingKoth().containsValue(player.getUniqueId())){
                             Chat.bukkitSend("knocked");
@@ -292,11 +303,15 @@ public class PlayerListener implements Listener, ApolloListener {
                             task.cancel();
                             return;
                         }
-                        long elapsed = System.currentTimeMillis() - startedAt;
-                        if (elapsed % 15000 < 50){
-                            Chat.bukkitSend(startedAt+"|"+System.currentTimeMillis()+"|"+(System.currentTimeMillis()-startedAt+"|"+Time.timePassedSecs(startedAt,System.currentTimeMillis())));
-                            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.transPrefix("&eSomeone is now capping (%timeCapped%)"
-                                    .replace("%timeCapped%",Time.formatSecs(Time.timePassedSecs(startedAt,System.currentTimeMillis()))))));
+                        if (Time.timePassedSecs(startedAt,System.currentTimeMillis()) % 15 == 0){
+                            if (!cd.get()) {
+                                Chat.bukkitSend(startedAt + "|" + System.currentTimeMillis() + "|" + (System.currentTimeMillis() - startedAt + "|" + Time.timePassedSecs(startedAt, System.currentTimeMillis())));
+                                player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.transPrefix("&eSomeone is capping (%timeCapped%)"
+                                        .replace("%timeCapped%", Time.formatSecs(Time.timePassedSecs(startedAt, System.currentTimeMillis()))))));
+                                cd.set(true);
+                            }
+                        }else{
+                            cd.set(false);
                         }
                         if (Time.timePassedSecs(startedAt,System.currentTimeMillis()) >= 60 * 6){
                             Game.endGame(arena,player);

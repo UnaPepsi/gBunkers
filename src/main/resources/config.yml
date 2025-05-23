@@ -63,6 +63,7 @@ messages:
   not_queued: "&cYou are not in a queue!"
   left_queue: "&aYou have left the queue!"
   in_game_cant: "&cYou can't do that while in a Game!"
+  f_home: "&eTeleporting to your faction's HQ in 10 seconds. Don't move or take damage"
   broadcast: "%player% &f&ais hosting a game of bunkers!"
   start_arena_setup: "&eIf at any point you wish to cancel the arena creation, type 'cancel'"
   set_arena_name: "&eType the Arena's display name (color codes included)"

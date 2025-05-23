@@ -60,6 +60,8 @@ public class GBunkers extends JavaPlugin {
             Chat.bukkitSend("Hooked to PlaceholderAPI");
         }
         PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
+        PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("randomTickSpeed","0");
+        PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doFireTick","false");
         customGuiConfig();
         deleteTeams();
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));

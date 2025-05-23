@@ -9,11 +9,11 @@ import dev.rollczi.litecommands.annotations.command.Command;
 import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.optional.OptionalArg;
+import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
-import ga.guimx.gbunkers.utils.Time;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -23,6 +23,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Command(name = "faction",aliases = {"f","t","team","equipoxdxdxd"})
@@ -61,11 +62,17 @@ public class FactionCommand {
 
     @Execute(name="hq",aliases = {"home","casa"}) //this is ugly as hell idc
     void executeFHome(@Context Player sender){
+        if (!PlayerInfo.getPlayersInGame().contains(sender.getUniqueId())){
+            sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("in_game_cant")));
+            return;
+        }
+        sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("f_home")));
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
             map.values().stream().filter(team -> team.getMembers().contains(sender)).findAny().ifPresent(team -> {
-                long startedAt = System.currentTimeMillis();
+                AtomicInteger timer = new AtomicInteger(11);
                 PlayerInfo.getPlayersFHomming().add(sender.getUniqueId());
                 Task.runTimer(task -> {
+                    timer.decrementAndGet();
                     List<UUID> memberUUIDs = team.getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
                     Recipients recipients = Recipients.of(
                             Apollo.getPlayerManager().getPlayers().stream()
@@ -73,7 +80,11 @@ public class FactionCommand {
                                     .collect(Collectors.toList())
                     );
                     if (!PlayerInfo.getPlayersFHomming().contains(sender.getUniqueId())){
-                        sender.sendMessage(Chat.transPrefix("&cYou've moved or got hit! cancelling teleport"));
+                        if (!arena.getTeams().get(team.getColor().name().toLowerCase()).getHome().equals(sender.getLocation())){
+                            sender.sendMessage(Chat.trans("&cYou've moved or got hit! cancelling teleport"));
+                        }else{
+                            sender.sendMessage(Chat.trans("&aYou've teleported to your faction's HQ"));
+                        }
                         for (Player player : team.getMembers()){
                             Apollo.getModuleManager().getModule(NametagModule.class).resetNametag(Recipients.ofEveryone(),player.getUniqueId());
                         }
@@ -91,7 +102,7 @@ public class FactionCommand {
                         task.cancel();
                         return;
                     }
-                    if (Time.timePassedSecs(startedAt,System.currentTimeMillis()) >= 10){
+                    if (timer.get() <= 0){
                         sender.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
                         PlayerInfo.getPlayersFHomming().remove(sender.getUniqueId());
                     }
@@ -102,7 +113,7 @@ public class FactionCommand {
                                                 .content(player.getDisplayName())
                                                 .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
                                                 .build(),
-                                        Chat.toComponent("&9F Home: "+(10-Time.timePassedSecs(startedAt,System.currentTimeMillis()))+"s")
+                                        Chat.toComponent("&9F Home: "+timer.get()+"s")
                                 ))
                                 .build());
                     }
@@ -114,12 +125,12 @@ public class FactionCommand {
                                                 .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
                                                 .build(),
                                         Chat.toComponent("&a[TEAM]"),
-                                        Chat.toComponent("&9F Home: "+(10-Time.timePassedSecs(startedAt,System.currentTimeMillis()))+"s")
+                                        Chat.toComponent("&9F Home: "+timer.get()+"s")
                                 ))
                                 .build());
                     }
 
-                },0,1);
+                },0,20);
             });
         });
     }
