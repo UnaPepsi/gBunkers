@@ -152,14 +152,14 @@ public class PlayerListener implements Listener, ApolloListener {
             case EMERALD_ORE:
                 event.getPlayer().getInventory().addItem(new ItemStack(Material.EMERALD));
                 break;
-            case WHEAT:
-                event.getPlayer().getInventory().addItem(new ItemStack(Material.WHEAT,5));
+            case CROPS:
+                event.getPlayer().getInventory().addItem(new ItemStack(Material.COOKED_BEEF,5));
                 break;
             default:
                 return;
         }
         Material originalBlockType = event.getBlock().getType();
-        if (originalBlockType == Material.WHEAT){
+        if (originalBlockType == Material.CROPS){
             event.getBlock().setType(Material.AIR);
         }else{
             event.getBlock().setType(Material.COBBLESTONE);
