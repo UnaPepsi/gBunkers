@@ -51,6 +51,14 @@ shop_prices:
   chest: 10
   trapped-chest: 10
   enchant: 300
+bard_effects:
+  DAMAGE_RESISTANCE: 1
+  SPEED: 2
+  WEAKNESS: 2
+  REGENERATION: 0
+archer_effects:
+  DAMAGE_RESISTANCE: 2
+  SPEED: 2
 messages:
   plugin_enabled: "&ahas been enabled :D!"
   plugin_disabled: "&chas been disabled, bye!"

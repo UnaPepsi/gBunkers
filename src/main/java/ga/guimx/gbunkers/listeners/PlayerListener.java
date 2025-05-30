@@ -5,6 +5,10 @@ import com.lunarclient.apollo.Apollo;
 import com.lunarclient.apollo.event.ApolloListener;
 import com.lunarclient.apollo.event.Listen;
 import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
+import com.lunarclient.apollo.module.nametag.Nametag;
+import com.lunarclient.apollo.module.nametag.NametagModule;
+import com.lunarclient.apollo.recipients.Recipients;
+import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.game.Game;
@@ -13,19 +17,28 @@ import ga.guimx.gbunkers.utils.guis.BlockShop;
 import ga.guimx.gbunkers.utils.guis.Enchanting;
 import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
-import org.bukkit.*;
+import lombok.var;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -36,7 +49,9 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class PlayerListener implements Listener, ApolloListener {
@@ -87,48 +102,44 @@ public class PlayerListener implements Listener, ApolloListener {
             event.setCancelled(true);
         }
     }
-
+    @EventHandler
+    void onHeldItemChange(PlayerItemHeldEvent event){
+        if (!(PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId()) && Classes.isBard(event.getPlayer()))) return;
+        Task.runLater(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -> {
+            Helpers.bardEffect(event.getPlayer(),true);
+        },1);
+    }
     @EventHandler
     void onBlockInteract(PlayerInteractEvent event){
-        if (event.getClickedBlock() == null) return;
         Player player = event.getPlayer();
-        ItemStack itemInHand = player.getItemInHand();
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+        Action action = event.getAction();
+        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) && (player.getItemInHand() != null || player.getItemInHand().getType() != Material.AIR)){
+            Classes.checkAndApply(player);
+            if (Classes.isArcher(player) && player.getItemInHand() != null){
+                Helpers.archerEffect(player);
+            }else if (Classes.isBard(player) && player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR){
+                Helpers.bardEffect(player,false);
+            }
+        }
+        //stop stomping on crops
+        if (action == Action.PHYSICAL && event.getClickedBlock().getType() == Material.SOIL){
+            event.setCancelled(true);
+        }
+
+        if (event.getClickedBlock() == null) return;
+        ItemStack itemInHand = player.getItemInHand();
 
         if (event.getClickedBlock().getType() == Material.ANVIL && itemInHand != null && itemInHand.getType() != Material.AIR){
             event.setCancelled(true);
-            if (PlayerInfo.getPlayersBalance().get(player) < itemInHand.getDurability()*2){
-                player.playSound(player.getLocation(), Sound.VILLAGER_NO,1,1);
-            }else{
-                PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)-itemInHand.getDurability()*2);
-                itemInHand.setDurability((short)0);
-                player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
-            }
+            Helpers.anvil(player);
             return;
         }else if (event.getClickedBlock().getType() == Material.ENCHANTMENT_TABLE){
             event.setCancelled(true);
             new Enchanting(player).open();
             return;
         }
-
-        event.setUseInteractedBlock(Event.Result.DENY);
-        ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            map.values().forEach(team -> {
-                Arena.Team arenaTeam = arena.getTeams().get(team.getColor().name().toLowerCase());
-                if (LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) &&
-                    (team.getMembers().contains(player) || team.getDtr() <= 0)){
-                    event.setUseInteractedBlock(Event.Result.ALLOW);
-                }
-                //if (!LocationCheck.isInside2D(event.getClickedBlock().getLocation(), arenaTeam.getClaimBorder1(),arenaTeam.getClaimBorder2()) &&
-                //        (!team.getMembers().contains(player) || team.getDtr() > 0 )){
-                //    event.setUseInteractedBlock(Event.Result.DENY);
-                //    player.sendMessage("dsasd");
-                //    //event.setCancelled(true);
-                //}else{
-                //    player.sendMessage("else");
-                //}
-            });
-        });
+        Helpers.blockPlaced(event);
     }
     @EventHandler
     void onBlockBreak(BlockBreakEvent event){
@@ -282,6 +293,7 @@ public class PlayerListener implements Listener, ApolloListener {
     void onMovement(PlayerMoveEvent event){
         Player player = event.getPlayer();
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
         if (
                 event.getFrom().getX() != event.getTo().getX() ||
                 event.getFrom().getY() != event.getTo().getY() ||
@@ -326,17 +338,111 @@ public class PlayerListener implements Listener, ApolloListener {
                     playerNowCapping.getWorld().getPlayers().forEach(p -> Chat.transPrefix("&e%player% &eis now capping".replace("%player%",((Player)playerNowCapping).getDisplayName())));
                 });
             }else{
+                var teams = arena.getTeams();
                 for (ChatColor color : map.keySet()) {
-                    Arena.Team team = arena.getTeams().get(color.name().toLowerCase());
-                    if (LocationCheck.isInside2D(player.getLocation(),team.getClaimBorder1(),team.getClaimBorder2()) && (!PlayerInfo.getPlayerLocation().containsKey(player) || !PlayerInfo.getPlayerLocation().get(player).equals(team.getColor()))){
-                        PlayerInfo.getPlayerLocation().put(player,team.getColor());
-                        player.sendMessage(Chat.trans("&eYou're entering %color%%team%&e's territory"
+                    Arena.Team team = teams.get(color.name().toLowerCase());
+                    if (LocationCheck.isInside2D(player.getLocation(),team.getClaimBorder1(),team.getClaimBorder2())){
+                        if (!PlayerInfo.getPlayerLocation().containsKey(player) || !PlayerInfo.getPlayerLocation().get(player).equals(team.getColor())){
+                            PlayerInfo.getPlayerLocation().put(player,team.getColor());
+                            player.sendMessage(Chat.trans("&eYou're entering %color%%team%&e's territory"
+                                    .replace("%color%", color.toString())
+                                    .replace("%team%",color.name())));
+                            break; //uhh if im correct this is to prevent buggy behavior from "PlayerInfo.getPlayerLocation().remove(player);" below
+                        }
+                    }else if (PlayerInfo.getPlayerLocation().containsKey(player) && PlayerInfo.getPlayerLocation().get(player) == team.getColor()){
+                        player.sendMessage(Chat.trans("&eYou're leaving %color%%team%&e's territory"
                                 .replace("%color%", color.toString())
                                 .replace("%team%",color.name())));
-                        break;
+                        PlayerInfo.getPlayerLocation().remove(player);
                     }
                 }
             }
         });
+    }
+    @EventHandler
+    void onArmorWear(InventoryClickEvent event){
+        if (!(event.getWhoClicked() instanceof Player)){
+            GBunkers.getInstance().getLogger().warning("???????????"+event.getWhoClicked());
+            return;
+        }
+        var player = (Player) event.getWhoClicked();
+        Task.runLater(jqwyeiquydiasydui12t8ut78astdyuagsydjgqwyuetgqwytgxcuashdkjhqwyidhqwuiahdquwhdqw -> {
+            Classes.checkAndApply(player);
+        },1);
+    }
+    @EventHandler(priority = EventPriority.HIGH)
+    void onShoot(EntityDamageByEntityEvent event){
+        if (!(event.getEntity() instanceof Player)) return;
+        Player victim = (Player) event.getEntity();
+        if (PlayerInfo.getPlayersArcherTagged().containsKey(victim)){
+            Chat.bukkitSend("dmg"+event.getDamage());
+            event.setDamage(event.getDamage()*1.25);
+            Chat.bukkitSend("dmg2"+event.getDamage());
+        }
+        if (!(event.getDamager() instanceof Arrow)) return;
+        Arrow arrow = (Arrow) event.getDamager();
+        if (!(arrow.getShooter() instanceof Player)) return;
+        Player attacker = (Player) arrow.getShooter();
+        if (!(PlayerInfo.getPlayersInGame().contains(victim.getUniqueId()) && PlayerInfo.getPlayersInGame().contains(attacker.getUniqueId()))) return;
+        if (Classes.isArcher(attacker)) {
+            victim.sendMessage(Chat.trans("&cYou've been Archer Tagged. Receiving 25% more damage for 10 seconds"));
+            event.setDamage(0);
+            victim.setHealth(victim.getHealth() - 4);
+            long ms = System.currentTimeMillis();
+            PlayerInfo.getPlayersArcherTagged().put(victim,ms);
+            AtomicInteger timer = new AtomicInteger(11);
+            ArenaInfo.getArenasInUse().forEach((arena, map) -> {
+                map.values().stream().filter(team -> team.getMembers().contains(victim)).findAny().ifPresent(team -> {
+                            List<UUID> memberUUIDs = team.getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
+                            Recipients recipients = Recipients.of(
+                                    Apollo.getPlayerManager().getPlayers().stream()
+                                            .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
+                                            .collect(Collectors.toList())
+                            );
+                            Task.runTimer(task -> {
+                                //if player got tagged again, let everything get handled by the other timer
+                                if (PlayerInfo.getPlayersArcherTagged().getOrDefault(victim,-1L) != ms) {
+                                    task.cancel();
+                                    return;
+                                }
+                                timer.decrementAndGet();
+                                if (timer.get() <= 0){
+                                    task.cancel();
+                                    PlayerInfo.getPlayersArcherTagged().remove(victim);
+                                    Apollo.getModuleManager().getModule(NametagModule.class).resetNametag(Recipients.ofEveryone(),victim.getUniqueId());
+                                    Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients, victim.getUniqueId(), Nametag.builder()
+                                            .lines(Lists.newArrayList(
+                                                    Component.text()
+                                                            .content(victim.getDisplayName())
+                                                            .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
+                                                            .build(),
+                                                    Chat.toComponent("&a[TEAM]")))
+                                            .build());
+                                    return;
+                                }
+                                Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(Recipients.ofEveryone(), victim.getUniqueId(), Nametag.builder()
+                                        .lines(Lists.newArrayList(
+                                                Component.text()
+                                                        .content(victim.getDisplayName())
+                                                        .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
+                                                        .build(),
+                                                Chat.toComponent("&eArcher tag: " + timer.get() + "s")
+                                        ))
+                                        .build());
+                                Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients, victim.getUniqueId(), Nametag.builder()
+                                        .lines(Lists.newArrayList(
+                                                Component.text()
+                                                        .content(victim.getDisplayName())
+                                                        .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
+                                                        .build(),
+                                                Chat.toComponent("&a[TEAM]"),
+                                                Chat.toComponent("&eArcher Tag: " + timer.get() + "s")
+                                        ))
+                                        .build());
+                            }, 1, 20);
+                        }
+                );
+            });
+        }
     }
 }

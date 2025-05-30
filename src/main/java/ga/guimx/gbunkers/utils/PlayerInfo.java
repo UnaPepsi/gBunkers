@@ -28,4 +28,14 @@ public class PlayerInfo {
     private static final Map<Player,ChatColor> playerLocation = Maps.newHashMap();
     @Getter
     private static final Map<Player,Long> startedCappingAt = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Long> playersArcherTagged = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Long> archerSpeedCD = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Long> archerJumpCD = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Short> bardEnergy = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Long> bardCD = Maps.newHashMap();
 }

@@ -160,7 +160,11 @@ public class Game {
 
     public static void spawnVillagers(Arena arena){
         arena.getTeams().forEach((color,team) -> {
+            if (!team.getHome().getChunk().isLoaded()){
+                team.getHome().getChunk().load();
+            }
             Villager blockshop = team.getBlockShop().getWorld().spawn(team.getBlockShop(), Villager.class);
+            Chat.bukkitSend(blockshop.isDead()+"|"+blockshop.getCustomName());
             blockshop.setAdult();
             blockshop.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,100000,10));
             blockshop.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,100000,10));

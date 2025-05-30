@@ -1,12 +1,8 @@
 package ga.guimx.gbunkers.game;
 
 import com.google.common.collect.Lists;
-import com.lunarclient.apollo.Apollo;
-import com.lunarclient.apollo.module.nametag.Nametag;
-import com.lunarclient.apollo.module.nametag.NametagModule;
-import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.GBunkers;
-import ga.guimx.gbunkers.utils.Chat;
+import ga.guimx.gbunkers.utils.Nametags;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import lombok.Getter;
@@ -18,8 +14,6 @@ import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Team {
     @Getter
@@ -65,35 +59,15 @@ public class Team {
         GBunkers.getTeamManager().deleteTeam(team.getTeamId());
     }
     public Team setLunarNametags(){
-        List<UUID> memberUUIDs = members.stream().map(Player::getUniqueId).collect(Collectors.toList());
-        Recipients recipients = Recipients.of(
-                Apollo.getPlayerManager().getPlayers().stream()
-                        .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
-                        .collect(Collectors.toList())
-        );
-        //opponents
-        //for (Player player : members){
-        //    Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(Recipients.ofEveryone(),player.getUniqueId(), Nametag.builder()
-        //            .lines(Lists.newArrayList(
-        //                    Component.text()
-        //                            .content(player.getDisplayName())
-        //                            .color(NamedTextColor.NAMES.value(color.name().toLowerCase()))
-        //                            .build()
-        //            ))
-        //            .build());
-        //}
-        //teammates
-        for (Player player : members){
-            Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients,player.getUniqueId(), Nametag.builder()
-                            .lines(Lists.newArrayList(
-                                    Component.text()
-                                            .content(player.getDisplayName())
-                                            .color(NamedTextColor.NAMES.value(color.name().toLowerCase()))
-                                            .build(),
-                                    Chat.toComponent("&a[TEAM]")
-                            ))
-                    .build());
-        }
+        members.forEach(member -> {
+            Nametags.getPlayersLunarNametag().put(member, Lists.newArrayList(
+                    Component.text()
+                            .content(member.getDisplayName())
+                            .color(NamedTextColor.NAMES.value(color.name().toLowerCase()))
+                            .build()
+            ));
+            Nametags.apply(member);
+        });
         return this;
     }
 }

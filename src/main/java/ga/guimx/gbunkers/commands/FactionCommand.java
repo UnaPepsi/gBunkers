@@ -1,10 +1,5 @@
 package ga.guimx.gbunkers.commands;
 
-import com.google.common.collect.Lists;
-import com.lunarclient.apollo.Apollo;
-import com.lunarclient.apollo.module.nametag.Nametag;
-import com.lunarclient.apollo.module.nametag.NametagModule;
-import com.lunarclient.apollo.recipients.Recipients;
 import dev.rollczi.litecommands.annotations.command.Command;
 import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;
@@ -12,16 +7,14 @@ import dev.rollczi.litecommands.annotations.optional.OptionalArg;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.utils.Chat;
+import ga.guimx.gbunkers.utils.Nametags;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import lombok.var;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -43,7 +36,7 @@ public class FactionCommand {
         AtomicBoolean found = new AtomicBoolean(false);
         ArenaInfo.getArenasInUse().forEach((arena, map) -> {
             map.values().stream()
-                    .filter(team -> !team.getMembers().isEmpty() && team.getMembers().getFirst().getWorld().equals(sender.getWorld()) &&
+                    .filter(team -> !team.getMembers().isEmpty() && team.getMembers().get(0).getWorld().equals(sender.getWorld()) &&
                             (team.getMembers().stream().map(Player::getName).collect(Collectors.toList()).contains(finalLookUp) || team.getColor().name().equalsIgnoreCase(finalLookUp)))
                     .findAny().ifPresent(team -> {
                         found.set(true);
@@ -73,32 +66,15 @@ public class FactionCommand {
                 PlayerInfo.getPlayersFHomming().add(sender.getUniqueId());
                 Task.runTimer(task -> {
                     timer.decrementAndGet();
-                    List<UUID> memberUUIDs = team.getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
-                    Recipients recipients = Recipients.of(
-                            Apollo.getPlayerManager().getPlayers().stream()
-                                    .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
-                                    .collect(Collectors.toList())
-                    );
+                    var nametag = Nametags.getPlayersLunarNametag().get(sender);
                     if (!PlayerInfo.getPlayersFHomming().contains(sender.getUniqueId())){
                         if (!arena.getTeams().get(team.getColor().name().toLowerCase()).getHome().equals(sender.getLocation())){
                             sender.sendMessage(Chat.trans("&cYou've moved or got hit! cancelling teleport"));
                         }else{
                             sender.sendMessage(Chat.trans("&aYou've teleported to your faction's HQ"));
                         }
-                        for (Player player : team.getMembers()){
-                            Apollo.getModuleManager().getModule(NametagModule.class).resetNametag(Recipients.ofEveryone(),player.getUniqueId());
-                        }
-                        for (Player player : team.getMembers()){
-                            Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients,player.getUniqueId(), Nametag.builder()
-                                    .lines(Lists.newArrayList(
-                                            Component.text()
-                                                    .content(player.getDisplayName())
-                                                    .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
-                                                    .build(),
-                                            Chat.toComponent("&a[TEAM]")
-                                    ))
-                                    .build());
-                        }
+                        nametag.remove(Chat.toComponent("&9F Home: " + (timer.get() + 1) + "s"));
+                        Nametags.apply(sender);
                         task.cancel();
                         return;
                     }
@@ -106,29 +82,13 @@ public class FactionCommand {
                         sender.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
                         PlayerInfo.getPlayersFHomming().remove(sender.getUniqueId());
                     }
-                    for (Player player : team.getMembers()){
-                        Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(Recipients.ofEveryone(),player.getUniqueId(), Nametag.builder()
-                                .lines(Lists.newArrayList(
-                                        Component.text()
-                                                .content(player.getDisplayName())
-                                                .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
-                                                .build(),
-                                        Chat.toComponent("&9F Home: "+timer.get()+"s")
-                                ))
-                                .build());
+                    if (nametag.contains(Chat.toComponent("&9F Home: "+(timer.get()+1)+"s"))){
+                        int index = nametag.indexOf(Chat.toComponent("&9F Home: "+(timer.get()+1)+"s"));
+                        nametag.set(index,Chat.toComponent("&9F Home: "+timer.get()+"s"));
+                    }else{
+                        nametag.add(Chat.toComponent("&9F Home: "+timer.get()+"s"));
                     }
-                    for (Player player : team.getMembers()){
-                        Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients,player.getUniqueId(), Nametag.builder()
-                                .lines(Lists.newArrayList(
-                                        Component.text()
-                                                .content(player.getDisplayName())
-                                                .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
-                                                .build(),
-                                        Chat.toComponent("&a[TEAM]"),
-                                        Chat.toComponent("&9F Home: "+timer.get()+"s")
-                                ))
-                                .build());
-                    }
+                    Nametags.apply(sender);
 
                 },0,20);
             });

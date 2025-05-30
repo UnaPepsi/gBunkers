@@ -2,12 +2,14 @@ package ga.guimx.gbunkers.config;
 
 import com.google.common.collect.Maps;
 import ga.guimx.gbunkers.GBunkers;
+import ga.guimx.gbunkers.utils.Chat;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
 import java.util.HashMap;
@@ -24,13 +26,17 @@ public class PluginConfig {
     @Getter
     private static Location lobbyLocation;
     @Getter
-    private static HashMap<String,ItemStack> lobbyInventory = new HashMap<>();
+    private static final HashMap<String,ItemStack> lobbyInventory = new HashMap<>();
     @Getter
     private static List<String> scoreboard;
     @Getter
-    private static Map<Material,Integer> moneyFromOres = Maps.newHashMap();
+    private static final Map<Material,Integer> moneyFromOres = Maps.newHashMap();
     @Getter
-    private static Map<String,Integer> shopPrices = Maps.newHashMap();
+    private static final Map<String,Integer> shopPrices = Maps.newHashMap();
+    @Getter
+    private static final Map<PotionEffectType,Integer> bardEffects = Maps.newHashMap();
+    @Getter
+    private static final Map<PotionEffectType,Integer> archerEffects = Maps.newHashMap();
     public void load(){
         file = new File(GBunkers.getInstance().getDataFolder(),"config.yml");
         if (!file.exists()){
@@ -81,6 +87,9 @@ public class PluginConfig {
         scoreboard = config.getStringList("scoreboard");
         config.getConfigurationSection("money_ores").getKeys(false).forEach(key -> moneyFromOres.put(Material.valueOf(key),config.getInt("money_ores."+key)));
         config.getConfigurationSection("shop_prices").getKeys(false).forEach(key -> shopPrices.put(key,config.getInt("shop_prices."+key)));
+        config.getConfigurationSection("bard_effects").getKeys(false).forEach(key -> bardEffects.put(PotionEffectType.getByName(key),config.getInt("bard_effects."+key)));
+        config.getConfigurationSection("archer_effects").getKeys(false).forEach(key -> archerEffects.put(PotionEffectType.getByName(key),config.getInt("archer_effects."+key)));
+        bardEffects.forEach((t,i) -> Chat.bukkitSend(t+"|"+i));
     }
     public static void setLobbyLocation(Location location){
         instance.config.set("lobby.world",location.getWorld());

@@ -2,6 +2,7 @@ package ga.guimx.gbunkers.utils;
 
 import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.game.ArenaInfo;
+import lombok.var;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -28,6 +29,7 @@ public class PAPIHook extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params){
         Player onlinePlayer = player.getPlayer();
+        var result = new AtomicReference<>("NaN");
         switch (params.toLowerCase()){
             case "players_queued":
                 return PlayerInfo.getPlayersQueued().size()+"";
@@ -42,7 +44,6 @@ public class PAPIHook extends PlaceholderExpansion {
                 if (onlinePlayer == null){
                     return "NaN";
                 }
-                AtomicReference<String> result = new AtomicReference<>("NaN");
                 ArenaInfo.getArenasInUse().forEach((arena,map) -> {
                     map.values().forEach(team -> {
                         if (team.getMembers().contains(onlinePlayer)){
@@ -51,6 +52,16 @@ public class PAPIHook extends PlaceholderExpansion {
                     });
                 });
                 return result.get();
+            case "bard_energy":
+                if (onlinePlayer == null || !PlayerInfo.getBardEnergy().containsKey(onlinePlayer)){
+                    return "0";
+                }
+                return PlayerInfo.getBardEnergy().getOrDefault(onlinePlayer,(short)0)+"";
+            case "bard_cooldown":
+                if (onlinePlayer == null || !PlayerInfo.getBardCD().containsKey(onlinePlayer)){
+                    return "0";
+                }
+                return PlayerInfo.getBardCD().getOrDefault(onlinePlayer,0L)+"";
         }
         return null;
     }
