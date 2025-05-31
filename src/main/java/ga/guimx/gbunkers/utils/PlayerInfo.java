@@ -29,7 +29,7 @@ public class PlayerInfo {
     @Getter
     private static final Map<Player,Long> startedCappingAt = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Long> playersArcherTagged = Maps.newHashMap();
+    private static final Map<Player,Short> playersArcherTagged = Maps.newHashMap();
     @Getter
     private static final Map<Player,Long> archerSpeedCD = Maps.newHashMap();
     @Getter

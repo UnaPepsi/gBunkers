@@ -59,6 +59,11 @@ public class FactionCommand {
             sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("in_game_cant")));
             return;
         }
+        if (PlayerInfo.getPlayersFHomming().contains(sender.getUniqueId())){
+            sender.sendMessage(Chat.trans("&cYou're already teleporting to your faction's HQ"));
+            return;
+        }
+        var nametag = Nametags.getPlayersLunarNametag().get(sender);
         sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("f_home")));
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
             map.values().stream().filter(team -> team.getMembers().contains(sender)).findAny().ifPresent(team -> {
@@ -66,7 +71,6 @@ public class FactionCommand {
                 PlayerInfo.getPlayersFHomming().add(sender.getUniqueId());
                 Task.runTimer(task -> {
                     timer.decrementAndGet();
-                    var nametag = Nametags.getPlayersLunarNametag().get(sender);
                     if (!PlayerInfo.getPlayersFHomming().contains(sender.getUniqueId())){
                         if (!arena.getTeams().get(team.getColor().name().toLowerCase()).getHome().equals(sender.getLocation())){
                             sender.sendMessage(Chat.trans("&cYou've moved or got hit! cancelling teleport"));
@@ -82,8 +86,9 @@ public class FactionCommand {
                         sender.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
                         PlayerInfo.getPlayersFHomming().remove(sender.getUniqueId());
                     }
-                    if (nametag.contains(Chat.toComponent("&9F Home: "+(timer.get()+1)+"s"))){
-                        int index = nametag.indexOf(Chat.toComponent("&9F Home: "+(timer.get()+1)+"s"));
+                    var opFHomeComponent = nametag.stream().filter(comp -> Chat.toPlainString(comp).startsWith("F Home")).findFirst();
+                    if (opFHomeComponent.isPresent()){
+                        int index = nametag.indexOf(opFHomeComponent.get());
                         nametag.set(index,Chat.toComponent("&9F Home: "+timer.get()+"s"));
                     }else{
                         nametag.add(Chat.toComponent("&9F Home: "+timer.get()+"s"));

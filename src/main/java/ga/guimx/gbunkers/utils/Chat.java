@@ -3,6 +3,7 @@ package ga.guimx.gbunkers.utils;
 import ga.guimx.gbunkers.GBunkers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -18,6 +19,9 @@ public class Chat {
     }
     public static Component toComponentPrefix(String string){
         return toComponent(GBunkers.getPrefix()+string);
+    }
+    public static String toPlainString(Component component){
+        return PlainTextComponentSerializer.plainText().serialize(component);
     }
     public static void bukkitSend(String string){
         Bukkit.getConsoleSender().sendMessage(Chat.transPrefix(string));

@@ -5,9 +5,6 @@ import com.lunarclient.apollo.Apollo;
 import com.lunarclient.apollo.event.ApolloListener;
 import com.lunarclient.apollo.event.Listen;
 import com.lunarclient.apollo.event.player.ApolloRegisterPlayerEvent;
-import com.lunarclient.apollo.module.nametag.Nametag;
-import com.lunarclient.apollo.module.nametag.NametagModule;
-import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
@@ -18,8 +15,6 @@ import ga.guimx.gbunkers.utils.guis.Enchanting;
 import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
 import lombok.var;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -49,9 +44,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class PlayerListener implements Listener, ApolloListener {
@@ -114,17 +107,21 @@ public class PlayerListener implements Listener, ApolloListener {
         Player player = event.getPlayer();
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
         Action action = event.getAction();
-        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) && (player.getItemInHand() != null || player.getItemInHand().getType() != Material.AIR)){
-            Classes.checkAndApply(player);
-            if (Classes.isArcher(player) && player.getItemInHand() != null){
+        if ((action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) && player.getItemInHand() != null){
+            if (Classes.getArmorSets().contains(player.getItemInHand().getType())){
+                Task.runLater(__ -> Classes.checkAndApply(player),1);
+            }
+            if (Classes.isArcher(player)){
                 Helpers.archerEffect(player);
-            }else if (Classes.isBard(player) && player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR){
+            }else if (Classes.isBard(player) && Classes.getBardItems().contains(player.getItemInHand().getType())){
                 Helpers.bardEffect(player,false);
             }
         }
         //stop stomping on crops
+        //player.sendMessage(action.name()+"|"+event.getClickedBlock().getType().name()+"|"+event.getMaterial());
         if (action == Action.PHYSICAL && event.getClickedBlock().getType() == Material.SOIL){
             event.setCancelled(true);
+            return;
         }
 
         if (event.getClickedBlock() == null) return;
@@ -388,61 +385,46 @@ public class PlayerListener implements Listener, ApolloListener {
             victim.sendMessage(Chat.trans("&cYou've been Archer Tagged. Receiving 25% more damage for 10 seconds"));
             event.setDamage(0);
             victim.setHealth(victim.getHealth() - 4);
-            long ms = System.currentTimeMillis();
-            PlayerInfo.getPlayersArcherTagged().put(victim,ms);
-            AtomicInteger timer = new AtomicInteger(11);
+            //don't start another timer if one's already running
+            if (PlayerInfo.getPlayersArcherTagged().containsKey(victim)){
+                PlayerInfo.getPlayersArcherTagged().put(victim,(short)11);
+                return;
+            }
+            PlayerInfo.getPlayersArcherTagged().put(victim,(short)11);
+            var nametag = Nametags.getPlayersLunarNametag().get(victim);
             ArenaInfo.getArenasInUse().forEach((arena, map) -> {
                 map.values().stream().filter(team -> team.getMembers().contains(victim)).findAny().ifPresent(team -> {
-                            List<UUID> memberUUIDs = team.getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
-                            Recipients recipients = Recipients.of(
-                                    Apollo.getPlayerManager().getPlayers().stream()
-                                            .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
-                                            .collect(Collectors.toList())
-                            );
                             Task.runTimer(task -> {
-                                //if player got tagged again, let everything get handled by the other timer
-                                if (PlayerInfo.getPlayersArcherTagged().getOrDefault(victim,-1L) != ms) {
-                                    task.cancel();
-                                    return;
-                                }
-                                timer.decrementAndGet();
-                                if (timer.get() <= 0){
+                                short timer = (short)(PlayerInfo.getPlayersArcherTagged().get(victim)-1);
+                                PlayerInfo.getPlayersArcherTagged().put(
+                                        victim,timer
+                                );
+                                if (timer <= 0){
                                     task.cancel();
                                     PlayerInfo.getPlayersArcherTagged().remove(victim);
-                                    Apollo.getModuleManager().getModule(NametagModule.class).resetNametag(Recipients.ofEveryone(),victim.getUniqueId());
-                                    Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients, victim.getUniqueId(), Nametag.builder()
-                                            .lines(Lists.newArrayList(
-                                                    Component.text()
-                                                            .content(victim.getDisplayName())
-                                                            .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
-                                                            .build(),
-                                                    Chat.toComponent("&a[TEAM]")))
-                                            .build());
+                                    nametag.remove(Chat.toComponent("&eArcher tag: " + (timer+1) + "s"));
+                                    Nametags.apply(victim);
                                     return;
                                 }
-                                Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(Recipients.ofEveryone(), victim.getUniqueId(), Nametag.builder()
-                                        .lines(Lists.newArrayList(
-                                                Component.text()
-                                                        .content(victim.getDisplayName())
-                                                        .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
-                                                        .build(),
-                                                Chat.toComponent("&eArcher tag: " + timer.get() + "s")
-                                        ))
-                                        .build());
-                                Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients, victim.getUniqueId(), Nametag.builder()
-                                        .lines(Lists.newArrayList(
-                                                Component.text()
-                                                        .content(victim.getDisplayName())
-                                                        .color(NamedTextColor.NAMES.value(team.getColor().name().toLowerCase()))
-                                                        .build(),
-                                                Chat.toComponent("&a[TEAM]"),
-                                                Chat.toComponent("&eArcher Tag: " + timer.get() + "s")
-                                        ))
-                                        .build());
+                                var opArcherTag = nametag.stream().filter(comp -> Chat.toPlainString(comp).startsWith("Archer tag")).findFirst();
+                                if (opArcherTag.isPresent()){
+                                    int index = nametag.indexOf(opArcherTag.get());
+                                    nametag.set(index,Chat.toComponent("&eArcher tag: " + timer + "s"));
+                                }else{
+                                    nametag.add(Chat.toComponent("&eArcher tag: " + timer + "s"));
+                                }
+                                Nametags.apply(victim);
                             }, 1, 20);
                         }
                 );
             });
+        }
+    }
+    @EventHandler
+    void onDropItem(PlayerDropItemEvent event){
+        var itemDropped = event.getItemDrop().getItemStack();
+        if (Classes.getArmorSets().contains(itemDropped.getType()) && Arrays.stream(event.getPlayer().getEquipment().getArmorContents()).anyMatch(item -> item == null || item.getType() == Material.AIR)){
+            Classes.checkAndApply(event.getPlayer());
         }
     }
 }
