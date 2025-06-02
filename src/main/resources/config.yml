@@ -54,7 +54,7 @@ shop_prices:
 bard_effects:
   DAMAGE_RESISTANCE: 1
   SPEED: 2
-  WEAKNESS: 2
+  WEAKNESS: 99
   REGENERATION: 0
 archer_effects:
   DAMAGE_RESISTANCE: 2

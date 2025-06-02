@@ -38,4 +38,8 @@ public class PlayerInfo {
     private static final Map<Player,Short> bardEnergy = Maps.newHashMap();
     @Getter
     private static final Map<Player,Long> bardCD = Maps.newHashMap();
+    @Getter
+    private static final Map<Player,Long> playersEnderPearlCD = Maps.newHashMap();
+    @Getter
+    private static final Map<Arena,String> arenaKothCapTime = Maps.newHashMap();
 }

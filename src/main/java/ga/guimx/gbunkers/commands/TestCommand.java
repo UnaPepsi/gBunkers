@@ -7,20 +7,22 @@ import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
 import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.ArenasConfig;
+import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.game.Game;
 import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
 import ga.guimx.gbunkers.utils.TeamManager;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Command(name = "test")
@@ -79,9 +81,11 @@ public class TestCommand {
         sender.getInventory().addItem(item);
     }
     @Execute(name="fstop")
-    void dumbStop(){
+    void dumbStop(@Context Player sender){
         Bukkit.getWorld("world").getEntities().forEach(Entity::remove);
-        Bukkit.shutdown();
+        //we're removing items while iterating
+        new ArrayList<>(ArenaInfo.getArenasInUse().keySet()).forEach(arena -> Game.endGame(arena,sender));
+        Task.runLater(a -> Bukkit.shutdown(),20*3);
     }
     @Execute(name="cappers")
     void cappersCheck(@Context Player sender){
@@ -89,5 +93,19 @@ public class TestCommand {
             sender.sendMessage(arena.getName()+"|"+Bukkit.getPlayer(uuid).getDisplayName());
         });
         Chat.bukkitSend("asdasd"+sender.getWorld().getPlayers().stream().map(Player::getDisplayName).collect(Collectors.joining("', ")));
+    }
+    @Execute(name="tp")
+    void teleportWorld(@Context Player sender, @Arg World world, @Arg Optional<Float> x, @Arg Optional<Float> y, @Arg Optional<Float> z){
+        sender.teleport(new Location(world,x.orElse(0f),y.orElse(100f),z.orElse(0f)));
+    }
+    @Execute(name="loadworld")
+    void loadWorld(@Context Player sender, @Arg String world){
+        if (Bukkit.getWorld(world) != null){
+            sender.sendMessage("World alr loaded");
+            return;
+        }
+        WorldCreator creator = new WorldCreator(world);
+        World wrld = Bukkit.createWorld(creator);
+        sender.sendMessage("is null: "+(wrld == null));
     }
 }

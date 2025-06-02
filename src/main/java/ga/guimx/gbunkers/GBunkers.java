@@ -17,15 +17,10 @@ import mc.obliviate.inventory.InventoryAPI;
 import mc.obliviate.inventory.configurable.ConfigurableGuiCache;
 import mc.obliviate.inventory.configurable.GuiConfigurationTable;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
@@ -59,18 +54,15 @@ public class GBunkers extends JavaPlugin {
             PAPIHook.registerHook();
             Chat.bukkitSend("Hooked to PlaceholderAPI");
         }
-        PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doMobSpawning","false");
-        PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("randomTickSpeed","0");
-        PluginConfig.getLobbyLocation().getWorld().setGameRuleValue("doFireTick","false");
+        Bukkit.getWorlds().forEach(world -> {
+            world.setGameRuleValue("doMobSpawning","false");
+            world.setGameRuleValue("randomTickSpeed","0");
+            world.setGameRuleValue("doFireTick","false");
+        });
         customGuiConfig();
         deleteTeams();
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
         checkForUpdates();
-        ItemStack testitem = new ItemStack(Material.POTION);
-        PotionMeta meta = (PotionMeta) testitem.getItemMeta();
-        meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED,18000,1),true);
-        testitem.setItemMeta(meta);
-        testitem.serialize().forEach((k,v) -> System.out.println(k+"="+v+"|class="+v.getClass().getName()));
     }
     @Override
     public void onDisable(){
@@ -89,7 +81,7 @@ public class GBunkers extends JavaPlugin {
             try{
                 String newPossibleVersion = PluginUpdates.getLatestVersion();
                 if (!newPossibleVersion.equals(getDescription().getVersion())){
-                    Bukkit.getConsoleSender().sendMessage(Chat.transPrefix(prefix + PluginConfig.getMessages().get("new_plugin_version_available")
+                    Bukkit.getConsoleSender().sendMessage(Chat.transPrefix(PluginConfig.getMessages().get("new_plugin_version_available")
                             .replace("%current_version%", getDescription().getVersion())
                             .replace("%new_version%", newPossibleVersion)
                             .replace("%repository%", "https://github.com/UnaPepsi/gBunkers/releases")));
@@ -110,5 +102,4 @@ public class GBunkers extends JavaPlugin {
     void deleteTeams(){
         Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(Team::unregister);
     }
-
 }

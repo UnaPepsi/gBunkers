@@ -56,13 +56,13 @@ public class Classes {
     }
     public static void applyArcher(Player player){
         PluginConfig.getBardEffects().keySet().forEach(player::removePotionEffect);
-        player.addPotionEffects(PluginConfig.getArcherEffects().keySet().stream().map(potionE -> new PotionEffect(potionE,100000,PluginConfig.getArcherEffects().get(potionE))).collect(Collectors.toList()));
+        player.addPotionEffects(PluginConfig.getArcherEffects().keySet().stream().map(potionE -> new PotionEffect(potionE,Integer.MAX_VALUE,PluginConfig.getArcherEffects().get(potionE))).collect(Collectors.toList()));
         PlayerInfo.getArcherJumpCD().put(player,PlayerInfo.getArcherJumpCD().getOrDefault(player,System.currentTimeMillis()*Time.SECONDS+35)); //35 the cooldown for
         PlayerInfo.getArcherSpeedCD().put(player,PlayerInfo.getArcherSpeedCD().getOrDefault(player,System.currentTimeMillis()*Time.SECONDS+35)); //35 the cooldown for
     }
     public static void applyBard(Player player){
         PluginConfig.getArcherEffects().keySet().forEach(player::removePotionEffect);
-        player.addPotionEffects(PluginConfig.getBardEffects().keySet().stream().map(potionE -> new PotionEffect(potionE,100000,PluginConfig.getBardEffects().get(potionE))).collect(Collectors.toList()));
+        player.addPotionEffects(PluginConfig.getBardEffects().keySet().stream().map(potionE -> new PotionEffect(potionE,Integer.MAX_VALUE,PluginConfig.getBardEffects().get(potionE))).collect(Collectors.toList()));
         PlayerInfo.getBardCD().put(player,PlayerInfo.getBardCD().getOrDefault(player,System.currentTimeMillis()));
         //to avoid multiple timers
         var nametag = Nametags.getPlayersLunarNametag().get(player);

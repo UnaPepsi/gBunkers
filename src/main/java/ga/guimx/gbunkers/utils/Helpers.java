@@ -4,6 +4,7 @@ import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.game.Team;
 import lombok.var;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -12,8 +13,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import static org.bukkit.Material.*;
 
 public class Helpers {
     public static void anvil(Player player){
@@ -25,7 +30,11 @@ public class Helpers {
             player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
         }
     }
-    public static void blockPlaced(PlayerInteractEvent event){
+    public static void blockInteract(PlayerInteractEvent event){
+        Material clickedBlockType = event.getClickedBlock().getType();
+        if (Arrays.asList(new Material[]{DIAMOND_ORE,IRON_ORE,GOLD_ORE,COAL_ORE,EMERALD_ORE}).contains(clickedBlockType)){
+            return;
+        }
         event.setUseInteractedBlock(Event.Result.DENY);
         ArenaInfo.getArenasInUse().forEach((arena, map) -> {
             map.values().forEach(team -> {
@@ -44,7 +53,7 @@ public class Helpers {
                 cd = Time.timePassedSecs(PlayerInfo.getArcherSpeedCD().get(player),System.currentTimeMillis());
                 if (cd > 35){
                     var effectToRecover = player.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.SPEED)).findFirst();
-                    effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> player.addPotionEffect(potionEffect,true), 20 * 10));
+                    effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> player.addPotionEffect(potionEffect, true), 20 * 10));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,20*10,3),true);
                     PlayerInfo.getArcherSpeedCD().put(player,System.currentTimeMillis());
                 }else{
@@ -55,7 +64,7 @@ public class Helpers {
                 cd = Time.timePassedSecs(PlayerInfo.getArcherJumpCD().get(player),System.currentTimeMillis());
                 if (cd > 35){
                     var effectToRecover = player.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.JUMP)).findFirst();
-                    effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> player.addPotionEffect(potionEffect,true), 20 * 10));
+                    effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> player.addPotionEffect(potionEffect, true), 20 * 10));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,20*10,6),true);
                     PlayerInfo.getArcherJumpCD().put(player,System.currentTimeMillis());
                 }else{
@@ -80,7 +89,9 @@ public class Helpers {
         }
         AtomicReference<List<Player>> teamatesAtomic = new AtomicReference<>(new ArrayList<>());
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            map.values().stream().map(Team::getMembers).filter(members -> members.contains(player)).findFirst().ifPresent(teamatesAtomic::set);
+            map.values().stream().map(Team::getMembers).filter(members -> members.contains(player)).findFirst().ifPresent(members -> {
+                teamatesAtomic.set(members.stream().filter(member -> member.getLocation().distance(player.getLocation()) <= 50).collect(Collectors.toList()));
+            });
         });
         if (teamatesAtomic.get().isEmpty()){
             GBunkers.getInstance().getLogger().warning("tF?? no teamateS?"+teamatesAtomic.get()+"|"+player.getName());
@@ -89,9 +100,11 @@ public class Helpers {
         switch (player.getItemInHand().getType()){
             case SUGAR:
                 teamates.forEach(p -> {
-                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.SPEED) && potE.getAmplifier() >= (isPasive ? 1 : 2))){
-                        var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.SPEED)).findFirst();
-                        effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 10));
+                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.SPEED) && potE.getAmplifier() >= (isPasive ? 1 : 2) && potE.getDuration() > 1000000)){
+                        if (!isPasive) {
+                            var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.SPEED)).findFirst();
+                            effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect, true), 20 * 10));
+                        }
                         p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,20*10,(isPasive ? 1 : 2)),true);
                     }
                 });
@@ -100,9 +113,11 @@ public class Helpers {
                 }
                 break;
             case FEATHER: teamates.forEach(p -> {
-                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.JUMP) && potE.getAmplifier() >= (isPasive ? 1 : 7))){
-                        var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.JUMP)).findFirst();
-                        effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 10));
+                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.JUMP) && potE.getAmplifier() >= (isPasive ? 1 : 7) && potE.getDuration() > 1000000)){
+                        if (!isPasive) {
+                            var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.JUMP)).findFirst();
+                            effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect, true), 20 * 10));
+                        }
                         p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP,20*10,(isPasive ? 1 : 7)),true);
                     }
                 });
@@ -111,9 +126,11 @@ public class Helpers {
                 }
                 break;
             case BLAZE_POWDER: teamates.forEach(p -> {
-                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.INCREASE_DAMAGE) && potE.getAmplifier() >= (isPasive ? 0 : 1))){
-                        var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.INCREASE_DAMAGE)).findFirst();
-                        effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 5));
+                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.INCREASE_DAMAGE) && potE.getAmplifier() >= (isPasive ? 0 : 1) && potE.getDuration() > 1000000)){
+                        if (!isPasive) {
+                            var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.INCREASE_DAMAGE)).findFirst();
+                            effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect, true), 20 * 5));
+                        }
                         p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE,20*5,(isPasive ? 0 : 1)),true);
                     }
                 });
@@ -122,9 +139,11 @@ public class Helpers {
                 }
                 break;
             case GHAST_TEAR: teamates.forEach(p -> {
-                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.REGENERATION) && potE.getAmplifier() >= (isPasive ? 0 : 2))){
-                        var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.REGENERATION)).findFirst();
-                        effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 5));
+                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.REGENERATION) && potE.getAmplifier() >= (isPasive ? 0 : 2) && potE.getDuration() > 1000000)){
+                        if (!isPasive) {
+                            var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.REGENERATION)).findFirst();
+                            effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect, true), 20 * 5));
+                        }
                         p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,20*5,(isPasive ? 0 : 2)),true);
                     }
                 });
@@ -133,9 +152,11 @@ public class Helpers {
                 }
                 break;
             case IRON_INGOT: teamates.forEach(p -> {
-                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.DAMAGE_RESISTANCE) && potE.getAmplifier() >= (isPasive ? 0 : 2))){
-                        var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.DAMAGE_RESISTANCE)).findFirst();
-                        effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 5));
+                    if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.DAMAGE_RESISTANCE) && potE.getAmplifier() >= (isPasive ? 0 : 2) && potE.getDuration() > 1000000)) {
+                        if (!isPasive) {
+                            var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.DAMAGE_RESISTANCE)).findFirst();
+                            effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 5));
+                        }
                         p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE,20*5,(isPasive ? 0 : 2)),true);
                     }
                 });

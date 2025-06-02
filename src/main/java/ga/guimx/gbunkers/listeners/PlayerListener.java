@@ -19,32 +19,30 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class PlayerListener implements Listener, ApolloListener {
@@ -136,7 +134,7 @@ public class PlayerListener implements Listener, ApolloListener {
             new Enchanting(player).open();
             return;
         }
-        Helpers.blockPlaced(event);
+        Helpers.blockInteract(event);
     }
     @EventHandler
     void onBlockBreak(BlockBreakEvent event){
@@ -210,7 +208,7 @@ public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
     void onWorldChange(PlayerPortalEvent event){event.setCancelled(PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId()));}
     @EventHandler
-    void onInvisDrink(PlayerItemConsumeEvent event){
+    void onPotionDrink(PlayerItemConsumeEvent event){
         ItemStack item = event.getItem();
         Player player = event.getPlayer();
         List<Player> playersCantSeePlayer = Lists.newArrayList();
@@ -220,11 +218,11 @@ public class PlayerListener implements Listener, ApolloListener {
                 return;
             }
             //player **should** only be in 1 team
-            player.getScoreboard().getTeams().stream().collect(Collectors.toList()).getFirst().setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+            player.getScoreboard().getTeams().stream().collect(Collectors.toList()).get(0).setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
             Task.runTimer(task -> {
                 if (!player.isOnline() || !player.hasPotionEffect(PotionEffectType.INVISIBILITY)){
                     playersCantSeePlayer.forEach(p -> p.showPlayer(player));
-                    player.getScoreboard().getTeams().stream().collect(Collectors.toList()).getFirst().setNameTagVisibility(NameTagVisibility.ALWAYS);
+                    player.getScoreboard().getTeams().stream().collect(Collectors.toList()).get(0).setNameTagVisibility(NameTagVisibility.ALWAYS);
                     task.cancel();
                     return;
                 }
@@ -252,6 +250,10 @@ public class PlayerListener implements Listener, ApolloListener {
             meta.removeItemFlags(ItemFlag.values());
             item.setItemMeta(meta);
             item.setType(Material.GLASS_BOTTLE);
+            event.setCancelled(true);
+            player.getInventory().remove(item);
+            //item.setAmount(0); doesn't work idk why
+            player.sendMessage(Chat.trans("&aYou have been cured!"));
         }
     }
     @EventHandler
@@ -273,6 +275,9 @@ public class PlayerListener implements Listener, ApolloListener {
                             player.setGameMode(GameMode.SURVIVAL);
                             player.teleport(arena.getTeams().get(team.getColor().name().toLowerCase()).getHome());
                             player.getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE), new ItemStack(Material.STONE_AXE)});
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE,20*10,5),true);
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,20*10,5),true);
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,20*10,5),true);
                         }, 20 * 10);
                     }
                     if (team.getDtr() == 0) { //to avoid spamming the message when people are killed with < 0 dtr
@@ -307,16 +312,18 @@ public class PlayerListener implements Listener, ApolloListener {
                     AtomicBoolean cd = new AtomicBoolean(false);
                     Task.runTimer(task -> {
                         if (!PlayerInfo.getPlayersCappingKoth().containsValue(player.getUniqueId())){
+                            PlayerInfo.getArenaKothCapTime().remove(arena);
                             Chat.bukkitSend("knocked");
                             player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.transPrefix("&e%player% &ehas been knocked".replace("%player%",player.getDisplayName()))));
                             task.cancel();
                             return;
                         }
-                        if (Time.timePassedSecs(startedAt,System.currentTimeMillis()) % 15 == 0){
+                        PlayerInfo.getArenaKothCapTime().put(arena,Time.formatSecs(6*60-Time.timePassedSecs(startedAt, System.currentTimeMillis())));
+                        if (Time.timePassedSecs(startedAt,System.currentTimeMillis()) % 45 == 0){
                             if (!cd.get()) {
                                 Chat.bukkitSend(startedAt + "|" + System.currentTimeMillis() + "|" + (System.currentTimeMillis() - startedAt + "|" + Time.timePassedSecs(startedAt, System.currentTimeMillis())));
                                 player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.transPrefix("&eSomeone is capping (%timeCapped%)"
-                                        .replace("%timeCapped%", Time.formatSecs(Time.timePassedSecs(startedAt, System.currentTimeMillis()))))));
+                                        .replace("%timeCapped%", Time.formatSecs(6*60-Time.timePassedSecs(startedAt, System.currentTimeMillis()))))));
                                 cd.set(true);
                             }
                         }else{
@@ -382,9 +389,13 @@ public class PlayerListener implements Listener, ApolloListener {
         Player attacker = (Player) arrow.getShooter();
         if (!(PlayerInfo.getPlayersInGame().contains(victim.getUniqueId()) && PlayerInfo.getPlayersInGame().contains(attacker.getUniqueId()))) return;
         if (Classes.isArcher(attacker)) {
+            if (Classes.isArcher(victim)){
+                attacker.sendMessage(Chat.trans("&cYou can't archer tag another archer"));
+                return;
+            }
             victim.sendMessage(Chat.trans("&cYou've been Archer Tagged. Receiving 25% more damage for 10 seconds"));
             event.setDamage(0);
-            victim.setHealth(victim.getHealth() - 4);
+            victim.setHealth(victim.getHealth() <= 4 ? 0 : victim.getHealth() - 4);
             //don't start another timer if one's already running
             if (PlayerInfo.getPlayersArcherTagged().containsKey(victim)){
                 PlayerInfo.getPlayersArcherTagged().put(victim,(short)11);
@@ -426,5 +437,34 @@ public class PlayerListener implements Listener, ApolloListener {
         if (Classes.getArmorSets().contains(itemDropped.getType()) && Arrays.stream(event.getPlayer().getEquipment().getArmorContents()).anyMatch(item -> item == null || item.getType() == Material.AIR)){
             Classes.checkAndApply(event.getPlayer());
         }
+    }
+    @EventHandler
+    void onEnderPearl(ProjectileLaunchEvent event){
+        if (!(event.getEntity().getShooter() instanceof Player) || !(event.getEntity() instanceof EnderPearl)) return;
+        Player player = (Player) event.getEntity().getShooter();
+        long currentTime = System.currentTimeMillis();
+        if (!PlayerInfo.getPlayersEnderPearlCD().containsKey(player) || Time.timePassedSecs(PlayerInfo.getPlayersEnderPearlCD().get(player),currentTime) >= 16){
+            PlayerInfo.getPlayersEnderPearlCD().put(player,currentTime);
+            return;
+        }
+        event.setCancelled(true);
+        player.getItemInHand().setAmount(player.getItemInHand().getAmount()+1);
+        player.sendMessage(Chat.trans(String.format("&cYou're on cooldown for %d seconds",16-Time.timePassedSecs(PlayerInfo.getPlayersEnderPearlCD().get(player),currentTime))));
+    }
+    @EventHandler
+    void onPotionSplash(PotionSplashEvent event){
+        //stop teamates from potting/debuffing themselves
+        if (!(event.getPotion().getShooter() instanceof Player)) return;
+        Player thrower = (Player) event.getPotion().getShooter();
+        if (!PlayerInfo.getPlayersInGame().contains(thrower.getUniqueId())) return;
+        AtomicReference<List<Player>> throwerMembers = new AtomicReference<>(new ArrayList<>());
+        ArenaInfo.getArenasInUse().forEach((arena,map) -> {
+            map.values().stream().filter(t -> t.getMembers().contains(thrower)).findFirst().ifPresent(t -> {
+                throwerMembers.set(new ArrayList<>(t.getMembers()));
+            });
+        });
+        event.getAffectedEntities().stream().filter(e -> e instanceof Player && !e.getUniqueId().equals(thrower.getUniqueId()) && throwerMembers.get().contains((Player)e)).forEach(player -> {
+            event.setIntensity(player,0);
+        });
     }
 }

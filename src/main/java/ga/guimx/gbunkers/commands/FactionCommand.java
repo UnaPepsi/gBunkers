@@ -37,7 +37,7 @@ public class FactionCommand {
         ArenaInfo.getArenasInUse().forEach((arena, map) -> {
             map.values().stream()
                     .filter(team -> !team.getMembers().isEmpty() && team.getMembers().get(0).getWorld().equals(sender.getWorld()) &&
-                            (team.getMembers().stream().map(Player::getName).collect(Collectors.toList()).contains(finalLookUp) || team.getColor().name().equalsIgnoreCase(finalLookUp)))
+                            (team.getMembers().stream().map(p -> p.getName().toLowerCase()).collect(Collectors.toList()).contains(finalLookUp.toLowerCase()) || team.getColor().name().equalsIgnoreCase(finalLookUp)))
                     .findAny().ifPresent(team -> {
                         found.set(true);
                         Location home = arena.getTeams().get(team.getColor().name().toLowerCase()).getHome();

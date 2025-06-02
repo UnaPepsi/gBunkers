@@ -55,6 +55,13 @@ public class ArenasConfig {
                 throw new IllegalArgumentException(String.format("There are multiple arenas named \"%s\"",key));
             }
             World world = Bukkit.getWorld(config.getString(path+"world"));
+            if (world == null){
+                WorldCreator creator = new WorldCreator(config.getString(path+"world"));
+                world = Bukkit.createWorld(creator);
+                if (world == null){
+                    GBunkers.getInstance().getLogger().warning(config.getString(path+"world")+" is null???");
+                }
+            }
             arenas.add(Arena.builder()
                     .name(config.getConfigurationSection(key).getName())
                     .world(world)
