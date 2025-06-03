@@ -21,7 +21,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +62,7 @@ public class GBunkers extends JavaPlugin {
             world.setGameRuleValue("doFireTick","false");
         });
         customGuiConfig();
-        deleteTeams();
+        lobbyScoreboard();
         Chat.bukkitSend(PluginConfig.getMessages().get("plugin_enabled"));
         checkForUpdates();
     }
@@ -99,7 +101,18 @@ public class GBunkers extends JavaPlugin {
         FileConfiguration villagerGui = YamlConfiguration.loadConfiguration(file);
         GuiConfigurationTable.setDefaultConfigurationTable(new GuiConfigurationTable(villagerGui));
     }
-    void deleteTeams(){
-        Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(Team::unregister);
+    void lobbyScoreboard(){
+        Task.runTimer(t -> {
+            Bukkit.getOnlinePlayers().stream().filter(p -> !PlayerInfo.getPlayersInGame().contains(p.getUniqueId())).forEach(p -> {
+                Scoreboard sc = p.getScoreboard();
+                Objective ob = sc.registerNewObjective("lobby","dummy");
+                ob.setDisplayName(Chat.trans("&cgBunkers &7┃ &aLobby"));
+                ob.setDisplaySlot(DisplaySlot.SIDEBAR);
+                ob.getScore("  ").setScore(2);
+                ob.getScore(Chat.trans("&aIn Queue: &e"+PlayerInfo.getPlayersQueued().size())).setScore(1);
+                ob.getScore(Chat.trans("&aIn Game: &e"+PlayerInfo.getPlayersInGame().size())).setScore(0);
+                p.setScoreboard(sc);
+            });
+        },0,20);
     }
 }

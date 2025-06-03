@@ -378,6 +378,14 @@ public class PlayerListener implements Listener, ApolloListener {
     void onShoot(EntityDamageByEntityEvent event){
         if (!(event.getEntity() instanceof Player)) return;
         Player victim = (Player) event.getEntity();
+        if (!(event.getDamager() instanceof Player)) return;
+        for (var map : ArenaInfo.getArenasInUse().values()) {
+            if (map.values().stream().anyMatch(t -> t.getMembers().contains((Player) event.getDamager()) && t.getMembers().contains(victim))) {
+                event.getDamager().sendMessage(Chat.trans("&cYou can't damage your own teammates"));
+                event.setCancelled(true);
+                return;
+            }
+        }
         if (PlayerInfo.getPlayersArcherTagged().containsKey(victim)){
             Chat.bukkitSend("dmg"+event.getDamage());
             event.setDamage(event.getDamage()*1.25);

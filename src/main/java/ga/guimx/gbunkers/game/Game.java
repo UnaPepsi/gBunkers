@@ -24,6 +24,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,59 +58,19 @@ public class Game {
         teams.get(ChatColor.RED)
                 .setDtr(teams.get(ChatColor.RED).getMembers().size())
                 .setTeamViewToMembers()
-                .setLunarNametags().getMembers().forEach(p -> {
-                    p.teleport(arena.getRedTeam().getHome());
-                    Scoreboard sc = p.getScoreboard();
-                    p.setDisplayName(ChatColor.RED+p.getName());
-                    org.bukkit.scoreboard.Team team = sc.getTeam("RED") == null ? sc.registerNewTeam("RED") : sc.getTeam("RED");
-                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
-                    team.setPrefix("§c");
-                    team.setAllowFriendlyFire(false);
-                    team.addPlayer(p);
-
-                });
+                .setLunarNametags().getMembers().forEach(p -> p.teleport(arena.getRedTeam().getHome()));
         teams.get(ChatColor.BLUE)
                 .setDtr(teams.get(ChatColor.BLUE).getMembers().size())
                 .setTeamViewToMembers()
-                .setLunarNametags().getMembers().forEach(p -> {
-                    p.teleport(arena.getBlueTeam().getHome());
-                    Scoreboard sc = p.getScoreboard();
-                    p.setDisplayName(ChatColor.BLUE+p.getName());
-                    org.bukkit.scoreboard.Team team = sc.getTeam("BLUE") == null ? sc.registerNewTeam("BLUE") : sc.getTeam("BLUE");
-                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
-                    team.setPrefix("§9");
-                    team.setAllowFriendlyFire(false);
-                    team.addPlayer(p);
-
-                });
+                .setLunarNametags().getMembers().forEach(p -> p.teleport(arena.getBlueTeam().getHome()));
         teams.get(ChatColor.GREEN)
                 .setDtr(teams.get(ChatColor.GREEN).getMembers().size())
                 .setTeamViewToMembers()
-                .setLunarNametags().getMembers().forEach(p -> {
-                    p.teleport(arena.getGreenTeam().getHome());
-                    Scoreboard sc = p.getScoreboard();
-                    p.setDisplayName(ChatColor.GREEN+p.getName());
-                    org.bukkit.scoreboard.Team team = sc.getTeam("GREEN") == null ? sc.registerNewTeam("GREEN") : sc.getTeam("GREEN");
-                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
-                    team.setPrefix("§a");
-                    team.setAllowFriendlyFire(false);
-                    team.addPlayer(p);
-
-                });
+                .setLunarNametags().getMembers().forEach(p -> p.teleport(arena.getGreenTeam().getHome()));
         teams.get(ChatColor.YELLOW)
                 .setDtr(teams.get(ChatColor.YELLOW).getMembers().size())
                 .setTeamViewToMembers()
-                .setLunarNametags().getMembers().forEach(p -> {
-                    p.teleport(arena.getYellowTeam().getHome());
-                    Scoreboard sc = p.getScoreboard();
-                    p.setDisplayName(ChatColor.YELLOW+p.getName());
-                    org.bukkit.scoreboard.Team team = sc.getTeam("YELLOW") == null ? sc.registerNewTeam("YELLOW") : sc.getTeam("YELLOW");
-                    //team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
-                    team.setPrefix("§e");
-                    team.setAllowFriendlyFire(false);
-                    team.addPlayer(p);
-
-                });
+                .setLunarNametags().getMembers().forEach(p -> p.teleport(arena.getYellowTeam().getHome()));
         applyWaypoints(arena,playersInQueue);
         spawnVillagers(arena);
         setScoreboard(teams.values(),arena);
@@ -206,9 +167,9 @@ public class Game {
                 return;
             }
             teams.forEach(team -> team.getMembers().forEach(member -> {
-                Scoreboard sc = Bukkit.getScoreboardManager().getNewScoreboard();
+                Scoreboard sc = Bukkit.getScoreboardManager().getNewScoreboard();;
                 Objective objective = sc.getObjective("scoreboard") == null ? sc.registerNewObjective("scoreboard","dummy") : sc.getObjective("scoreboard");
-                objective.setDisplayName(Chat.trans("&cgBunkers &7| &f"+arena.getName()));
+                objective.setDisplayName(Chat.trans("&cgBunkers &7┃ &f"+arena.getName()));
                 objective.setDisplaySlot(DisplaySlot.SIDEBAR);
                 objective.getScore(Chat.trans("           ")).setScore(5);
                 objective.getScore(Chat.trans(arena.getName()+"&e: "+PlayerInfo.getArenaKothCapTime().getOrDefault(arena,"06:00"))).setScore(4);
@@ -226,11 +187,7 @@ public class Game {
     }
 
     public static void endGame(Arena arena, Player whoCapped){
-        //triple loop oh god
-        ArenaInfo.getArenasInUse().get(arena).forEach((c,team) -> {
-            team.removeTeamViewFromMembers();
-            Bukkit.getScoreboardManager().getMainScoreboard().getTeams().forEach(scoreboardTeam -> team.getMembers().forEach(scoreboardTeam::removePlayer));
-        });
+        ArenaInfo.getArenasInUse().get(arena).values().forEach(Team::removeTeamViewFromMembers);
         PlayerInfo.getBlocksChanged().stream().filter(loc -> loc.getWorld().equals(arena.getWorld())).forEach(loc -> loc.getBlock().setType(Material.AIR));
         arena.getTeams().values().forEach(team -> {
             if (!team.getSellShop().getChunk().isLoaded()){

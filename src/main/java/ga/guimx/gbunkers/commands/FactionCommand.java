@@ -22,9 +22,12 @@ import java.util.stream.Collectors;
 @Command(name = "faction",aliases = {"f","t","team","equipoxdxdxd"})
 public class FactionCommand {
 
+    @Execute
+    void executeHelp(@Context Player sender){
+        sender.sendMessage(Chat.trans("&c/f who and /f hq das it"));
+    }
     @Execute(name="who",aliases = {"info","i","quienxdxd"})
     void executeFWho(@Context Player sender, @OptionalArg String lookUp) {
-        sender.sendMessage("lookUp: "+lookUp);
         if (!PlayerInfo.getPlayersInGame().contains(sender.getUniqueId())){
             sender.sendMessage(Chat.trans("&cYou're not in a game!"));
             return;
@@ -45,7 +48,7 @@ public class FactionCommand {
                                 .replace("%team%", team.getColor()+team.getColor().name())
                                 .replace("%home%",String.format("%d, %d, %d",home.getBlockZ(),home.getBlockY(),home.getBlockZ()))
                                 .replace("%dtr%",(team.getDtr() > 0 ? team.getDtr() > 1 ? ChatColor.GREEN : ChatColor.YELLOW : ChatColor.RED) + (team.getDtr()+""))
-                                .replace("%members%",team.getMembers().stream().map(Player::getDisplayName).collect(Collectors.joining(", ")))));
+                                .replace("%members%",team.getColor()+team.getMembers().stream().map(Player::getDisplayName).collect(Collectors.joining(", ")))));
                     });
         });
         if (!found.get()){
