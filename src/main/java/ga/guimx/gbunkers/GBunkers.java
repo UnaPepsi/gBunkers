@@ -104,8 +104,8 @@ public class GBunkers extends JavaPlugin {
     void lobbyScoreboard(){
         Task.runTimer(t -> {
             Bukkit.getOnlinePlayers().stream().filter(p -> !PlayerInfo.getPlayersInGame().contains(p.getUniqueId())).forEach(p -> {
-                Scoreboard sc = p.getScoreboard();
-                Objective ob = sc.registerNewObjective("lobby","dummy");
+                Scoreboard sc = Bukkit.getScoreboardManager().getNewScoreboard();
+                Objective ob = sc.getObjective("lobby") == null ? sc.registerNewObjective("lobby","dummy") : sc.getObjective("lobby");
                 ob.setDisplayName(Chat.trans("&cgBunkers &7┃ &aLobby"));
                 ob.setDisplaySlot(DisplaySlot.SIDEBAR);
                 ob.getScore("  ").setScore(2);

@@ -24,7 +24,7 @@ public class FactionCommand {
 
     @Execute
     void executeHelp(@Context Player sender){
-        sender.sendMessage(Chat.trans("&c/f who and /f hq das it"));
+        sender.sendMessage(Chat.trans("&c/f who <team|player>\n/f home\n/f chat"));
     }
     @Execute(name="who",aliases = {"info","i","quienxdxd"})
     void executeFWho(@Context Player sender, @OptionalArg String lookUp) {
@@ -59,7 +59,7 @@ public class FactionCommand {
     @Execute(name="hq",aliases = {"home","casa"}) //this is ugly as hell idc
     void executeFHome(@Context Player sender){
         if (!PlayerInfo.getPlayersInGame().contains(sender.getUniqueId())){
-            sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("in_game_cant")));
+            sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("not_in_game_cant")));
             return;
         }
         if (PlayerInfo.getPlayersFHomming().contains(sender.getUniqueId())){
@@ -101,6 +101,20 @@ public class FactionCommand {
                 },0,20);
             });
         });
+    }
+    @Execute(name="chat",aliases = {"c","platicarxd"})
+    void factionChat(@Context Player sender){
+        if (!PlayerInfo.getPlayersInGame().contains(sender.getUniqueId())){
+            sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("not_in_game_cant")));
+            return;
+        }
+        if (PlayerInfo.getPlayersInFactionChat().contains(sender.getUniqueId())){
+            PlayerInfo.getPlayersInFactionChat().remove(sender.getUniqueId());
+            sender.sendMessage(Chat.trans("&eYou're now talking in public chat"));
+        }else{
+            PlayerInfo.getPlayersInFactionChat().add(sender.getUniqueId());
+            sender.sendMessage(Chat.trans("&aYou're now talking in faction chat"));
+        }
     }
 
 }

@@ -112,7 +112,8 @@ public class Helpers {
                     player.sendMessage(Chat.trans(String.format("&aGave speed to &4%d &ateamates",teamates.size())));
                 }
                 break;
-            case FEATHER: teamates.forEach(p -> {
+            case FEATHER:
+                teamates.forEach(p -> {
                     if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.JUMP) && potE.getAmplifier() >= (isPasive ? 1 : 7) && potE.getDuration() > 1000000)){
                         if (!isPasive) {
                             var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.JUMP)).findFirst();
@@ -125,7 +126,8 @@ public class Helpers {
                     player.sendMessage(Chat.trans(String.format("&aGave jump to &4%d &ateamates",teamates.size())));
                 }
                 break;
-            case BLAZE_POWDER: teamates.forEach(p -> {
+            case BLAZE_POWDER:
+                teamates.forEach(p -> {
                     if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.INCREASE_DAMAGE) && potE.getAmplifier() >= (isPasive ? 0 : 1) && potE.getDuration() > 1000000)){
                         if (!isPasive) {
                             var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.INCREASE_DAMAGE)).findFirst();
@@ -138,7 +140,8 @@ public class Helpers {
                     player.sendMessage(Chat.trans(String.format("&aGave strength to &4%d &ateamates",teamates.size())));
                 }
                 break;
-            case GHAST_TEAR: teamates.forEach(p -> {
+            case GHAST_TEAR:
+                teamates.forEach(p -> {
                     if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.REGENERATION) && potE.getAmplifier() >= (isPasive ? 0 : 2) && potE.getDuration() > 1000000)){
                         if (!isPasive) {
                             var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.REGENERATION)).findFirst();
@@ -151,7 +154,8 @@ public class Helpers {
                     player.sendMessage(Chat.trans(String.format("&aGave regeneration to &4%d &ateamates",teamates.size())));
                 }
                 break;
-            case IRON_INGOT: teamates.forEach(p -> {
+            case IRON_INGOT:
+                teamates.forEach(p -> {
                     if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.DAMAGE_RESISTANCE) && potE.getAmplifier() >= (isPasive ? 0 : 2) && potE.getDuration() > 1000000)) {
                         if (!isPasive) {
                             var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.DAMAGE_RESISTANCE)).findFirst();
@@ -162,6 +166,20 @@ public class Helpers {
                 });
                 if (!isPasive){
                     player.sendMessage(Chat.trans(String.format("&aGave resistance to &4%d &ateamates",teamates.size())));
+                }
+                break;
+            case MAGMA_CREAM:
+                teamates.forEach(p -> {
+                if (p.getActivePotionEffects().stream().noneMatch(potE -> potE.getType().equals(PotionEffectType.FIRE_RESISTANCE) && potE.getAmplifier() >= 0 && potE.getDuration() > 1000000)) {
+                    if (!isPasive) {
+                        var effectToRecover = p.getActivePotionEffects().stream().filter(potE -> potE.getType().equals(PotionEffectType.FIRE_RESISTANCE)).findFirst();
+                        effectToRecover.ifPresent(potionEffect -> Task.runLater(xdxdxdxdxdxdxdxdxd -> p.addPotionEffect(potionEffect,true), 20 * 60));
+                    }
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE,isPasive ? 20*5 : 20*60,0),true);
+                }
+                });
+                if (!isPasive){
+                    player.sendMessage(Chat.trans(String.format("&aGave fire resistance to &4%d &ateamates",teamates.size())));
                 }
                 break;
         }

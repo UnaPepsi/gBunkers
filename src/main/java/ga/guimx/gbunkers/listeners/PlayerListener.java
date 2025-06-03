@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+//please split listeners in different files to organize stuff when making a plugin, don't do this sh*t
 public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
     void onJoin(PlayerJoinEvent event){
@@ -474,5 +475,31 @@ public class PlayerListener implements Listener, ApolloListener {
         event.getAffectedEntities().stream().filter(e -> e instanceof Player && !e.getUniqueId().equals(thrower.getUniqueId()) && throwerMembers.get().contains((Player)e)).forEach(player -> {
             event.setIntensity(player,0);
         });
+    }
+
+    @EventHandler
+    void onChat(AsyncPlayerChatEvent event){
+        //don't show messages to players in diff games or in lobby
+        String msg = event.getMessage();
+        event.setCancelled(true);
+        Player player = event.getPlayer();
+        if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
+            //event.setFormat(Chat.trans("&f%s: %s"));
+            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(String.format("&f%s: %s",player.getName(),msg))));
+            return;
+        }
+        AtomicReference<ChatColor> cc = new AtomicReference<>(ChatColor.WHITE);
+        AtomicReference<List<Player>> teamMembers = new AtomicReference<>(new ArrayList<>());
+        ArenaInfo.getArenasInUse().forEach((arena,map) -> {
+            map.values().stream().filter(t -> t.getMembers().contains(player)).findFirst().ifPresent(t -> {
+               cc.set(t.getColor());
+               teamMembers.set(t.getMembers());
+            });
+        });
+        if (msg.startsWith("@") || (PlayerInfo.getPlayersInFactionChat().contains(player.getUniqueId()) && !msg.startsWith("!"))){
+            teamMembers.get().forEach(p -> p.sendMessage(Chat.trans(String.format("&3(Team) %s: &e%s",player.getName(),ChatColor.stripColor(msg.replaceFirst("@",""))))));
+        }else{
+            player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(String.format("&7[%s&7] %s&f: %s",cc.get()+cc.get().name(),player.getName(),msg.replaceFirst("!","")))));
+        }
     }
 }

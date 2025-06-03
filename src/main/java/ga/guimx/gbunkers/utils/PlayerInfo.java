@@ -42,4 +42,6 @@ public class PlayerInfo {
     private static final Map<Player,Long> playersEnderPearlCD = Maps.newHashMap();
     @Getter
     private static final Map<Arena,String> arenaKothCapTime = Maps.newHashMap();
+    @Getter
+    private static final List<UUID> playersInFactionChat = new ArrayList<>();
 }
