@@ -1,5 +1,6 @@
 prefix: "&7[&cgBunkers&7] "
 players_needed_to_start_game: 20
+players_per_team: 4
 lobby:
   world: "world"
   x: 0
@@ -10,6 +11,7 @@ lobby:
 lobby_items:
   not_queued: INK_SACK:8
   queued: INK_SACK:10
+  spec: CLOCK
 money_ores:
   COAL: 20
   IRON_INGOT: 30

@@ -29,32 +29,32 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Game {
-    public static void startGame(Arena arena){ //TODO: end game remove players from lunar teamview
+    public static void startGame(Arena arena){
         if (ArenaInfo.isArenaOccupied(arena)){
             throw new IllegalStateException("Arena already in use: "+arena.getName());
         }
-        List<Player> playersInQueue = new ArrayList<>(PlayerInfo.getPlayersQueued()).stream().map(Bukkit::getPlayer).collect(Collectors.toList());
+        List<Player> playersInQueue = new ArrayList<>(PlayerInfo.getPlayersQueued()).stream().map(Bukkit::getPlayer).collect(Collectors.toList()).subList(0,PluginConfig.getPlayersNeededToStartGame());
         //Map<ChatColor, List<Player>> teams = Maps.newHashMap();
         Map<ChatColor, Team> teams = Maps.newHashMap();
         ChatColor[] colors = {ChatColor.RED,ChatColor.BLUE,ChatColor.GREEN,ChatColor.YELLOW};
         for (ChatColor color : colors) {
             teams.put(color,new Team(new ArrayList<>(),color));
         }
-        for (int i = 0; i < PlayerInfo.getPlayersQueued().size(); i++){
-            ChatColor color = colors[i%2];
-            teams.get(color).getMembers().add(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)));
-            PlayerInfo.getPlayersInGame().add(PlayerInfo.getPlayersQueued().get(i));
-            PlayerInfo.getPlayersBalance().put(Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)),0);
-            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).setGameMode(GameMode.SURVIVAL);
-            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE,20*10,5),true);
-            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,20*10,5),true);
-            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,20*10,5),true);
-            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).getInventory().clear();
-            Bukkit.getPlayer(PlayerInfo.getPlayersQueued().get(i)).getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE),new ItemStack(Material.STONE_AXE)});
+        for (Player player : playersInQueue) {
+            ChatColor color = colors[playersInQueue.indexOf(player)%PluginConfig.getPlayersPerTeam()];
+            teams.get(color).getMembers().add(player);
+            PlayerInfo.getPlayersInGame().add(player.getUniqueId());
+            PlayerInfo.getPlayersBalance().put(player,0);
+            player.setGameMode(GameMode.SURVIVAL);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE,20*10,5),true);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,20*10,5),true);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION,20*10,5),true);
+            player.getInventory().clear();
+            player.getInventory().setContents(new ItemStack[]{new ItemStack(Material.STONE_PICKAXE),new ItemStack(Material.STONE_AXE)});
+            PlayerInfo.getPlayersQueued().remove(player.getUniqueId());
         }
         giveMoneyToPlayers(playersInQueue);
         ArenaInfo.getArenasInUse().put(arena,teams);
-        PlayerInfo.getPlayersQueued().clear();
         teams.get(ChatColor.RED)
                 .setDtr(teams.get(ChatColor.RED).getMembers().size())
                 .setTeamViewToMembers()
@@ -95,9 +95,9 @@ public class Game {
             } catch (Exception ignored) {}
         });
         Apollo.getModuleManager().getModule(WaypointModule.class).displayWaypoint(recipients, Waypoint.builder()
-                .name("KOTH")
+                .name(arena.getKoth().getName())
                 .location(BukkitApollo.toApolloBlockLocation(arena.getKoth().getLowestCapzoneCorner().clone().add(arena.getKoth().getHighestCapzoneCorner()).multiply(0.5)))
-                .color(Color.ORANGE)
+                .color(Chat.getColor(arena.getKoth().getName()))
                 .preventRemoval(false)
                 .hidden(false)
                 .build()
@@ -187,7 +187,10 @@ public class Game {
     }
 
     public static void endGame(Arena arena, Player whoCapped){
-        ArenaInfo.getArenasInUse().get(arena).values().forEach(Team::removeTeamViewFromMembers);
+        ArenaInfo.getArenasInUse().get(arena).values().forEach(team -> {
+            team.removeTeamViewFromMembers();
+            team.removeWaypoints();
+        });
         PlayerInfo.getBlocksChanged().stream().filter(loc -> loc.getWorld().equals(arena.getWorld())).forEach(loc -> loc.getBlock().setType(Material.AIR));
         arena.getTeams().values().forEach(team -> {
             if (!team.getSellShop().getChunk().isLoaded()){

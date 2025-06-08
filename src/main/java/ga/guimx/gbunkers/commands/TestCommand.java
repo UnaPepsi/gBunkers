@@ -6,13 +6,9 @@ import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
 import ga.guimx.gbunkers.GBunkers;
-import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.game.Game;
-import ga.guimx.gbunkers.utils.Chat;
-import ga.guimx.gbunkers.utils.PlayerInfo;
-import ga.guimx.gbunkers.utils.Task;
-import ga.guimx.gbunkers.utils.TeamManager;
+import ga.guimx.gbunkers.utils.*;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
@@ -61,8 +57,12 @@ public class TestCommand {
     }
 
     @Execute(name="startgame")
-    void startGame(@Context Player sender){
-        Game.startGame(ArenasConfig.getArenas().get(0));
+    void startGame(@Context Player sender, @Arg Arena arena){
+        try{
+            Game.startGame(arena);
+        } catch (IllegalStateException e){
+            sender.sendMessage(Chat.trans("&cArena in use"));
+        }
     }
     @Execute(name="hide")
     void toggleHide(@Context Player sender, @Arg Player target){

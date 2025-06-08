@@ -37,6 +37,10 @@ public class PluginConfig {
     private static final Map<PotionEffectType,Integer> bardEffects = Maps.newHashMap();
     @Getter
     private static final Map<PotionEffectType,Integer> archerEffects = Maps.newHashMap();
+    @Getter
+    private static int playersNeededToStartGame;
+    @Getter
+    private static int playersPerTeam;
     public void load(){
         file = new File(GBunkers.getInstance().getDataFolder(),"config.yml");
         if (!file.exists()){
@@ -72,6 +76,8 @@ public class PluginConfig {
         });
     }
     private void loadConfig(){
+        playersNeededToStartGame = config.getInt("players_needed_to_start_game");
+        playersPerTeam = config.getInt("players_per_team");
         lobbyLocation = new Location(
                 Bukkit.getWorld(config.getString("lobby.world")),
                 config.getDouble("lobby.x"),
@@ -82,7 +88,11 @@ public class PluginConfig {
         );
         config.getConfigurationSection("lobby_items").getKeys(false).forEach(key -> {
             String[] t = config.getString("lobby_items."+key).split(":");
-            lobbyInventory.put(key, new ItemStack(Material.valueOf(t[0]),1,Byte.parseByte(t[1])));
+            if (t.length == 2){
+                lobbyInventory.put(key, new ItemStack(Material.valueOf(t[0]),1,Byte.parseByte(t[1])));
+            }else{
+                lobbyInventory.put(key, new ItemStack(Material.valueOf(t[0])));
+            }
         });
         scoreboard = config.getStringList("scoreboard");
         config.getConfigurationSection("money_ores").getKeys(false).forEach(key -> moneyFromOres.put(Material.valueOf(key),config.getInt("money_ores."+key)));

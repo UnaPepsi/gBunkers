@@ -1,6 +1,9 @@
 package ga.guimx.gbunkers.game;
 
 import com.google.common.collect.Lists;
+import com.lunarclient.apollo.Apollo;
+import com.lunarclient.apollo.module.waypoint.WaypointModule;
+import com.lunarclient.apollo.recipients.Recipients;
 import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.utils.Nametags;
 import ga.guimx.gbunkers.utils.Task;
@@ -14,6 +17,8 @@ import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Team {
     @Getter
@@ -57,6 +62,15 @@ public class Team {
     public void removeTeamViewFromMembers(){
         check = false;
         GBunkers.getTeamManager().deleteTeam(team.getTeamId());
+    }
+    public void removeWaypoints(){
+        List<UUID> memberUUIDs = getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
+        Recipients recipients = Recipients.of(
+                Apollo.getPlayerManager().getPlayers().stream()
+                        .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
+                        .collect(Collectors.toList())
+        );
+        Apollo.getModuleManager().getModule(WaypointModule.class).resetWaypoints(recipients);
     }
     public Team setLunarNametags(){
         members.forEach(member -> {

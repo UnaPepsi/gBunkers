@@ -1,6 +1,7 @@
 package ga.guimx.gbunkers.listeners;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.lunarclient.apollo.Apollo;
 import com.lunarclient.apollo.event.ApolloListener;
 import com.lunarclient.apollo.event.Listen;
@@ -9,6 +10,7 @@ import ga.guimx.gbunkers.GBunkers;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.game.ArenaInfo;
 import ga.guimx.gbunkers.game.Game;
+import ga.guimx.gbunkers.game.Team;
 import ga.guimx.gbunkers.utils.*;
 import ga.guimx.gbunkers.utils.guis.BlockShop;
 import ga.guimx.gbunkers.utils.guis.Enchanting;
@@ -38,15 +40,14 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 //please split listeners in different files to organize stuff when making a plugin, don't do this sh*t
 public class PlayerListener implements Listener, ApolloListener {
+    private final HashMap<UUID, Long> playersDisconnectedtimer = Maps.newHashMap();
     @EventHandler
     void onJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
@@ -62,15 +63,40 @@ public class PlayerListener implements Listener, ApolloListener {
             //player.getInventory().setContents(PluginConfig.getLobbyInventory().values().toArray(new ItemStack[0]));
             player.getInventory().setItem(0,PluginConfig.getLobbyInventory().get("not_queued"));
         }
-        if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) {
-            Scoreboard sc = player.getScoreboard();
-            sc.getTeams().forEach(t -> t.removePlayer(player));
-        }
     }
 
     @Listen
     void onJoin(ApolloRegisterPlayerEvent event){
         event.getPlayer().sendMessage(Chat.toComponentPrefix(PluginConfig.getMessages().get("joined_with_lunar")));
+    }
+
+    @EventHandler
+    void onQuit(PlayerQuitEvent event){
+        //omg
+        Player player = event.getPlayer();
+        if (PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
+            for (Map<ChatColor, Team> map : ArenaInfo.getArenasInUse().values()) {
+                Team team = map.values().stream().filter(t -> t.getMembers().contains(player)).findFirst().orElse(null);
+                if (team != null){
+                    long when = System.currentTimeMillis();
+                    playersDisconnectedtimer.put(player.getUniqueId(),when);
+                    player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(team.getColor()+player.getName()+" &ehas disconnected. They have 5 minutes to reconnect or else they'll be marked as dead")));
+                    Task.runLater(task -> {
+                        if (playersDisconnectedtimer.get(player.getUniqueId()) != when || player.isOnline()) return;
+                        team.setDtr(team.getDtr()-1);
+                        player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(team.getColor()+p.getName()+" &ahas been killed")));
+                        if (team.getDtr() == 0) { //to avoid spamming the message when people are killed with < 0 dtr
+                            player.getWorld().getPlayers().forEach(p -> {
+                                p.sendMessage(Chat.transPrefix("&cTeam %color%%team% &cis raidable!"
+                                        .replace("%color%", team.getColor().toString())
+                                        .replace("%team%", team.getColor().name())));
+                            });
+                        }
+                    },20*60*5);
+                    return;
+                }
+            }
+        }
     }
 
     @EventHandler
