@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ public class PlayerInfo {
     @Getter
     private static final List<UUID> playersInGame = new ArrayList<>();
     @Getter
-    private static final Map<Player,Integer> playersBalance = Maps.newHashMap();
+    private static final Map<UUID,Integer> playersBalance = Maps.newHashMap();
     @Getter
     private static final List<Location> blocksChanged = new ArrayList<>();
     @Getter
@@ -25,23 +24,25 @@ public class PlayerInfo {
     @Getter
     private static final List<UUID> playersFHomming = new ArrayList<>();
     @Getter
-    private static final Map<Player,ChatColor> playerLocation = Maps.newHashMap();
+    private static final Map<UUID,ChatColor> playerLocation = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Long> startedCappingAt = Maps.newHashMap();
+    private static final Map<UUID,Long> startedCappingAt = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Short> playersArcherTagged = Maps.newHashMap();
+    private static final Map<UUID,Short> playersArcherTagged = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Long> archerSpeedCD = Maps.newHashMap();
+    private static final Map<UUID,Long> archerSpeedCD = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Long> archerJumpCD = Maps.newHashMap();
+    private static final Map<UUID,Long> archerJumpCD = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Short> bardEnergy = Maps.newHashMap();
+    private static final Map<UUID,Short> bardEnergy = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Long> bardCD = Maps.newHashMap();
+    private static final Map<UUID,Long> bardCD = Maps.newHashMap();
     @Getter
-    private static final Map<Player,Long> playersEnderPearlCD = Maps.newHashMap();
+    private static final Map<UUID,Long> playersEnderPearlCD = Maps.newHashMap();
     @Getter
     private static final Map<Arena,String> arenaKothCapTime = Maps.newHashMap();
     @Getter
     private static final List<UUID> playersInFactionChat = new ArrayList<>();
+    @Getter
+    private static final Map<UUID,Arena> playersSpectating = Maps.newHashMap();
 }

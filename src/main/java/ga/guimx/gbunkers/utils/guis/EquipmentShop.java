@@ -93,14 +93,14 @@ public class EquipmentShop extends ConfigurableGui {
     void handleArmor(InventoryClickEvent event, String name){
         int moneyValue = PluginConfig.getShopPrices().get(name);
         ItemStack item = event.getCurrentItem().clone();
-        if (PlayerInfo.getPlayersBalance().get(player) < moneyValue){
+        if (PlayerInfo.getPlayersBalance().get(player.getUniqueId()) < moneyValue){
             player.playSound(player.getLocation(), Sound.VILLAGER_NO,1,1);
             return;
         }
         if (name.startsWith("a-")){
             Optional<ChatColor> team = null;
             for (Map<ChatColor, Team> map : ArenaInfo.getArenasInUse().values()) {
-                team = map.keySet().stream().filter(color -> map.get(color).getMembers().contains(player)).findFirst();
+                team = map.keySet().stream().filter(color -> map.get(color).getMembers().contains(player.getUniqueId())).findFirst();
                 if (team.isPresent()){
                     break;
                 }
@@ -128,8 +128,8 @@ public class EquipmentShop extends ConfigurableGui {
         else if (name.endsWith("boots")){
             player.getEquipment().setBoots(item);
         }
-        PlayerInfo.getPlayersBalance().put(player,
-                PlayerInfo.getPlayersBalance().get(player)-moneyValue);
+        PlayerInfo.getPlayersBalance().put(player.getUniqueId(),
+                PlayerInfo.getPlayersBalance().get(player.getUniqueId())-moneyValue);
         player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
     }
     ItemStack handlePotion(ItemStack item, PotionType effect, int level, boolean isExtended, boolean isSplash){
@@ -154,12 +154,12 @@ public class EquipmentShop extends ConfigurableGui {
     boolean handleItem(InventoryClickEvent event, String name){
         System.out.println(event.getCurrentItem().getItemMeta().getDisplayName());
         int moneyValue = PluginConfig.getShopPrices().get(name);
-        if (PlayerInfo.getPlayersBalance().get(player) < moneyValue){
+        if (PlayerInfo.getPlayersBalance().get(player.getUniqueId()) < moneyValue){
             player.playSound(player.getLocation(), Sound.VILLAGER_NO,1,1);
             return false;
         }
-        PlayerInfo.getPlayersBalance().put(player,
-                PlayerInfo.getPlayersBalance().get(player)-moneyValue);
+        PlayerInfo.getPlayersBalance().put(player.getUniqueId(),
+                PlayerInfo.getPlayersBalance().get(player.getUniqueId())-moneyValue);
         player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
         player.getInventory().addItem(event.getCurrentItem());
         return true;

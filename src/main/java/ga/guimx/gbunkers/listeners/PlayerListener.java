@@ -17,10 +17,7 @@ import ga.guimx.gbunkers.utils.guis.Enchanting;
 import ga.guimx.gbunkers.utils.guis.EquipmentShop;
 import ga.guimx.gbunkers.utils.guis.SellShop;
 import lombok.var;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -38,7 +35,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,6 +59,13 @@ public class PlayerListener implements Listener, ApolloListener {
             player.teleport(PluginConfig.getLobbyLocation());
             //player.getInventory().setContents(PluginConfig.getLobbyInventory().values().toArray(new ItemStack[0]));
             player.getInventory().setItem(0,PluginConfig.getLobbyInventory().get("not_queued"));
+            player.getInventory().setItem(4,PluginConfig.getLobbyInventory().get("spectator"));
+        }else{
+            ArenaInfo.getArenasInUse().values().forEach(m -> m.values().stream().filter(t -> t.getMembers().contains(player.getUniqueId())).findFirst().ifPresent(t -> {
+                if (t.getDtr() <= 0){
+                    player.setGameMode(GameMode.SPECTATOR);
+                }
+            }));
         }
     }
 
@@ -74,9 +78,15 @@ public class PlayerListener implements Listener, ApolloListener {
     void onQuit(PlayerQuitEvent event){
         //omg
         Player player = event.getPlayer();
+        var toRemove = PlayerInfo.getPlayersCappingKoth().entrySet().stream()
+                .filter(entry -> entry.getValue().equals(player.getUniqueId()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        toRemove.forEach(arena -> PlayerInfo.getPlayersCappingKoth().remove(arena));
+        Task.runLater(__ -> Classes.checkAndApply(player),1); //since player is not online this removes bard and archer stuff
         if (PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
             for (Map<ChatColor, Team> map : ArenaInfo.getArenasInUse().values()) {
-                Team team = map.values().stream().filter(t -> t.getMembers().contains(player)).findFirst().orElse(null);
+                Team team = map.values().stream().filter(t -> t.getMembers().contains(player.getUniqueId())).findFirst().orElse(null);
                 if (team != null){
                     long when = System.currentTimeMillis();
                     playersDisconnectedtimer.put(player.getUniqueId(),when);
@@ -84,7 +94,7 @@ public class PlayerListener implements Listener, ApolloListener {
                     Task.runLater(task -> {
                         if (playersDisconnectedtimer.get(player.getUniqueId()) != when || player.isOnline()) return;
                         team.setDtr(team.getDtr()-1);
-                        player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(team.getColor()+p.getName()+" &ahas been killed")));
+                        player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(team.getColor()+player.getName()+" &ahas been killed")));
                         if (team.getDtr() == 0) { //to avoid spamming the message when people are killed with < 0 dtr
                             player.getWorld().getPlayers().forEach(p -> {
                                 p.sendMessage(Chat.transPrefix("&cTeam %color%%team% &cis raidable!"
@@ -216,6 +226,9 @@ public class PlayerListener implements Listener, ApolloListener {
             return;
         }
         event.setCancelled(true);
+        if (!PlayerInfo.getPlayersInGame().contains(event.getPlayer().getUniqueId())){
+            return;
+        }
         switch (who.getCustomName().substring(2)){
             case "Sell Shop":
                 new SellShop(event.getPlayer()).open();
@@ -255,8 +268,9 @@ public class PlayerListener implements Listener, ApolloListener {
                 }
                 ArenaInfo.getArenasInUse().forEach((arena,map) -> {
                     map.values().forEach(team -> {
-                        if (!team.getMembers().contains(player)){
-                            team.getMembers().forEach(p -> {
+                        if (!team.getMembers().contains(player.getUniqueId())){
+                            team.getMembers().forEach(u -> {
+                                Player p = Bukkit.getPlayer(u);
                                 if (p.getLocation().distance(player.getLocation()) > 5 && Arrays.stream(player.getEquipment().getArmorContents()).allMatch(i -> i.getType() == Material.AIR)) {
                                     p.hidePlayer(player);
                                     playersCantSeePlayer.add(p);
@@ -291,7 +305,7 @@ public class PlayerListener implements Listener, ApolloListener {
         }
         Location deathLoc = player.getLocation().clone();
         ArenaInfo.getArenasInUse().forEach((arena,map) ->{
-            map.values().stream().filter(team -> team.getMembers().contains(player)).forEach(team -> {
+            map.values().stream().filter(team -> team.getMembers().contains(player.getUniqueId())).forEach(team -> {
                 Task.runLater(task -> {
                     player.spigot().respawn();
                     player.setGameMode(GameMode.SPECTATOR);
@@ -321,8 +335,31 @@ public class PlayerListener implements Listener, ApolloListener {
     @EventHandler
     void onMovement(PlayerMoveEvent event){
         Player player = event.getPlayer();
+        if (player.getGameMode() == GameMode.SPECTATOR){
+            if (PlayerInfo.getPlayersSpectating().containsKey(player.getUniqueId())){
+                Location loc1 = PlayerInfo.getPlayersSpectating().get(player.getUniqueId()).getBorder1();
+                Location loc2 = PlayerInfo.getPlayersSpectating().get(player.getUniqueId()).getBorder2();
+                if (!LocationCheck.isInside3D(event.getTo(),loc1,loc2)){
+                    event.setCancelled(true);
+                    player.playSound(event.getFrom(), Sound.VILLAGER_NO,1,1);
+                    Vector vc = player.getVelocity().multiply(-1);
+                    if (event.getTo().getY() >= loc2.getY()){
+                        vc.setY(-2);
+                    }else if (event.getTo().getY() <= loc1.getY()){
+                        vc.setY(2);
+                    }
+                    player.setVelocity(vc);
+                    //if whatever shenanigans happens just teleport the player back to where spectators spawn
+                    Task.runLater(a -> {
+                        if (!LocationCheck.isInside3D(player.getLocation(),loc1,loc2) && PlayerInfo.getPlayersSpectating().containsKey(player.getUniqueId())){
+                            player.teleport(PlayerInfo.getPlayersSpectating().get(player.getUniqueId()).getSpectatorSpawn());
+                        }
+                    },20*5);
+                }
+            }
+            return;
+        }
         if (!PlayerInfo.getPlayersInGame().contains(player.getUniqueId())) return;
-        if (player.getGameMode() == GameMode.SPECTATOR) return;
         if (
                 event.getFrom().getX() != event.getTo().getX() ||
                 event.getFrom().getY() != event.getTo().getY() ||
@@ -373,18 +410,18 @@ public class PlayerListener implements Listener, ApolloListener {
                 for (ChatColor color : map.keySet()) {
                     Arena.Team team = teams.get(color.name().toLowerCase());
                     if (LocationCheck.isInside2D(player.getLocation(),team.getClaimBorder1(),team.getClaimBorder2())){
-                        if (!PlayerInfo.getPlayerLocation().containsKey(player) || !PlayerInfo.getPlayerLocation().get(player).equals(team.getColor())){
-                            PlayerInfo.getPlayerLocation().put(player,team.getColor());
+                        if (!PlayerInfo.getPlayerLocation().containsKey(player.getUniqueId()) || !PlayerInfo.getPlayerLocation().get(player.getUniqueId()).equals(team.getColor())){
+                            PlayerInfo.getPlayerLocation().put(player.getUniqueId(),team.getColor());
                             player.sendMessage(Chat.trans("&eYou're entering %color%%team%&e's territory"
                                     .replace("%color%", color.toString())
                                     .replace("%team%",color.name())));
                             break; //uhh if im correct this is to prevent buggy behavior from "PlayerInfo.getPlayerLocation().remove(player);" below
                         }
-                    }else if (PlayerInfo.getPlayerLocation().containsKey(player) && PlayerInfo.getPlayerLocation().get(player) == team.getColor()){
+                    }else if (PlayerInfo.getPlayerLocation().containsKey(player.getUniqueId()) && PlayerInfo.getPlayerLocation().get(player.getUniqueId()) == team.getColor()){
                         player.sendMessage(Chat.trans("&eYou're leaving %color%%team%&e's territory"
                                 .replace("%color%", color.toString())
                                 .replace("%team%",color.name())));
-                        PlayerInfo.getPlayerLocation().remove(player);
+                        PlayerInfo.getPlayerLocation().remove(player.getUniqueId());
                     }
                 }
             }
@@ -407,13 +444,13 @@ public class PlayerListener implements Listener, ApolloListener {
         Player victim = (Player) event.getEntity();
         if (!(event.getDamager() instanceof Player)) return;
         for (var map : ArenaInfo.getArenasInUse().values()) {
-            if (map.values().stream().anyMatch(t -> t.getMembers().contains((Player) event.getDamager()) && t.getMembers().contains(victim))) {
+            if (map.values().stream().anyMatch(t -> t.getMembers().contains(event.getDamager().getUniqueId()) && t.getMembers().contains(victim.getUniqueId()))) {
                 event.getDamager().sendMessage(Chat.trans("&cYou can't damage your own teammates"));
                 event.setCancelled(true);
                 return;
             }
         }
-        if (PlayerInfo.getPlayersArcherTagged().containsKey(victim)){
+        if (PlayerInfo.getPlayersArcherTagged().containsKey(victim.getUniqueId())){
             Chat.bukkitSend("dmg"+event.getDamage());
             event.setDamage(event.getDamage()*1.25);
             Chat.bukkitSend("dmg2"+event.getDamage());
@@ -432,22 +469,22 @@ public class PlayerListener implements Listener, ApolloListener {
             event.setDamage(0);
             victim.setHealth(victim.getHealth() <= 4 ? 0 : victim.getHealth() - 4);
             //don't start another timer if one's already running
-            if (PlayerInfo.getPlayersArcherTagged().containsKey(victim)){
-                PlayerInfo.getPlayersArcherTagged().put(victim,(short)11);
+            if (PlayerInfo.getPlayersArcherTagged().containsKey(victim.getUniqueId())){
+                PlayerInfo.getPlayersArcherTagged().put(victim.getUniqueId(),(short)11);
                 return;
             }
-            PlayerInfo.getPlayersArcherTagged().put(victim,(short)11);
-            var nametag = Nametags.getPlayersLunarNametag().get(victim);
+            PlayerInfo.getPlayersArcherTagged().put(victim.getUniqueId(),(short)11);
+            var nametag = Nametags.getPlayersLunarNametag().get(victim.getUniqueId());
             ArenaInfo.getArenasInUse().forEach((arena, map) -> {
-                map.values().stream().filter(team -> team.getMembers().contains(victim)).findAny().ifPresent(team -> {
+                map.values().stream().filter(team -> team.getMembers().contains(victim.getUniqueId())).findAny().ifPresent(team -> {
                             Task.runTimer(task -> {
-                                short timer = (short)(PlayerInfo.getPlayersArcherTagged().get(victim)-1);
+                                short timer = (short)(PlayerInfo.getPlayersArcherTagged().get(victim.getUniqueId())-1);
                                 PlayerInfo.getPlayersArcherTagged().put(
-                                        victim,timer
+                                        victim.getUniqueId(),timer
                                 );
                                 if (timer <= 0){
                                     task.cancel();
-                                    PlayerInfo.getPlayersArcherTagged().remove(victim);
+                                    PlayerInfo.getPlayersArcherTagged().remove(victim.getUniqueId());
                                     nametag.remove(Chat.toComponent("&eArcher tag: " + (timer+1) + "s"));
                                     Nametags.apply(victim);
                                     return;
@@ -478,13 +515,13 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!(event.getEntity().getShooter() instanceof Player) || !(event.getEntity() instanceof EnderPearl)) return;
         Player player = (Player) event.getEntity().getShooter();
         long currentTime = System.currentTimeMillis();
-        if (!PlayerInfo.getPlayersEnderPearlCD().containsKey(player) || Time.timePassedSecs(PlayerInfo.getPlayersEnderPearlCD().get(player),currentTime) >= 16){
-            PlayerInfo.getPlayersEnderPearlCD().put(player,currentTime);
+        if (!PlayerInfo.getPlayersEnderPearlCD().containsKey(player.getUniqueId()) || Time.timePassedSecs(PlayerInfo.getPlayersEnderPearlCD().get(player.getUniqueId()),currentTime) >= 16){
+            PlayerInfo.getPlayersEnderPearlCD().put(player.getUniqueId(),currentTime);
             return;
         }
         event.setCancelled(true);
         player.getItemInHand().setAmount(player.getItemInHand().getAmount()+1);
-        player.sendMessage(Chat.trans(String.format("&cYou're on cooldown for %d seconds",16-Time.timePassedSecs(PlayerInfo.getPlayersEnderPearlCD().get(player),currentTime))));
+        player.sendMessage(Chat.trans(String.format("&cYou're on cooldown for %d seconds",16-Time.timePassedSecs(PlayerInfo.getPlayersEnderPearlCD().get(player.getUniqueId()),currentTime))));
     }
     @EventHandler
     void onPotionSplash(PotionSplashEvent event){
@@ -492,13 +529,13 @@ public class PlayerListener implements Listener, ApolloListener {
         if (!(event.getPotion().getShooter() instanceof Player)) return;
         Player thrower = (Player) event.getPotion().getShooter();
         if (!PlayerInfo.getPlayersInGame().contains(thrower.getUniqueId())) return;
-        AtomicReference<List<Player>> throwerMembers = new AtomicReference<>(new ArrayList<>());
+        AtomicReference<List<UUID>> throwerMembers = new AtomicReference<>(new ArrayList<>());
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            map.values().stream().filter(t -> t.getMembers().contains(thrower)).findFirst().ifPresent(t -> {
+            map.values().stream().filter(t -> t.getMembers().contains(thrower.getUniqueId())).findFirst().ifPresent(t -> {
                 throwerMembers.set(new ArrayList<>(t.getMembers()));
             });
         });
-        event.getAffectedEntities().stream().filter(e -> e instanceof Player && !e.getUniqueId().equals(thrower.getUniqueId()) && throwerMembers.get().contains((Player)e)).forEach(player -> {
+        event.getAffectedEntities().stream().filter(e -> e instanceof Player && !e.getUniqueId().equals(thrower.getUniqueId()) && throwerMembers.get().contains(e.getUniqueId())).forEach(player -> {
             event.setIntensity(player,0);
         });
     }
@@ -515,15 +552,15 @@ public class PlayerListener implements Listener, ApolloListener {
             return;
         }
         AtomicReference<ChatColor> cc = new AtomicReference<>(ChatColor.WHITE);
-        AtomicReference<List<Player>> teamMembers = new AtomicReference<>(new ArrayList<>());
+        AtomicReference<List<UUID>> teamMembers = new AtomicReference<>(new ArrayList<>());
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            map.values().stream().filter(t -> t.getMembers().contains(player)).findFirst().ifPresent(t -> {
+            map.values().stream().filter(t -> t.getMembers().contains(player.getUniqueId())).findFirst().ifPresent(t -> {
                cc.set(t.getColor());
                teamMembers.set(t.getMembers());
             });
         });
         if (msg.startsWith("@") || (PlayerInfo.getPlayersInFactionChat().contains(player.getUniqueId()) && !msg.startsWith("!"))){
-            teamMembers.get().forEach(p -> p.sendMessage(Chat.trans(String.format("&3(Team) %s: &e%s",player.getName(),ChatColor.stripColor(msg.replaceFirst("@",""))))));
+            teamMembers.get().forEach(u -> Bukkit.getPlayer(u).sendMessage(Chat.trans(String.format("&3(Team) %s: &e%s",player.getName(),ChatColor.stripColor(msg.replaceFirst("@",""))))));
         }else{
             player.getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans(String.format("&7[%s&7] %s&f: %s",cc.get()+cc.get().name(),player.getName(),msg.replaceFirst("!","")))));
         }

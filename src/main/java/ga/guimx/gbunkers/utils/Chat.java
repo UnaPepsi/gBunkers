@@ -31,6 +31,7 @@ public class Chat {
     }
     public static Color getColor(String string) {
         TextColor a = toComponent(string).color();
+        if (a == null) return Color.WHITE;
         return new Color(a.red(),a.green(),a.blue());
     }
 }

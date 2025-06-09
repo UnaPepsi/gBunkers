@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class Nametags {
     @Getter
     @Setter
-    private static Map<Player,List<Component>> playersLunarNametag = Maps.newHashMap();
+    private static Map<UUID,List<Component>> playersLunarNametag = Maps.newHashMap();
     public static void apply(Player player){
         //if (playersLunarNametag.get(player).isEmpty()){
         //    Apollo.getModuleManager().getModule(NametagModule.class).resetNametag(Recipients.ofEveryone(),player.getUniqueId());
@@ -29,18 +29,17 @@ public class Nametags {
         //}
         Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(Recipients.ofEveryone(),player.getUniqueId(),
                 Nametag.builder()
-                .lines(playersLunarNametag.get(player))
+                .lines(playersLunarNametag.get(player.getUniqueId()))
                 .build()
         );
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            map.values().stream().filter(t -> t.getMembers().contains(player)).findFirst().ifPresent(t -> {
-                List<UUID> memberUUIDs = t.getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
+            map.values().stream().filter(t -> t.getMembers().contains(player.getUniqueId())).findFirst().ifPresent(t -> {
                 Recipients recipients = Recipients.of(
                         Apollo.getPlayerManager().getPlayers().stream()
-                                .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
+                                .filter(apolloPlayer -> t.getMembers().contains(apolloPlayer.getUniqueId()))
                                 .collect(Collectors.toList())
                 );
-                var cloned = new ArrayList<>(playersLunarNametag.get(player));
+                var cloned = new ArrayList<>(playersLunarNametag.get(player.getUniqueId()));
                 cloned.add(Chat.toComponent("&a[TEAM]"));
                 Apollo.getModuleManager().getModule(NametagModule.class).overrideNametag(recipients,player.getUniqueId(),
                         Nametag.builder()
@@ -49,8 +48,5 @@ public class Nametags {
                 );
             });
         });
-    }
-    public static void applyAll(){
-        playersLunarNametag.keySet().forEach(Nametags::apply);
     }
 }

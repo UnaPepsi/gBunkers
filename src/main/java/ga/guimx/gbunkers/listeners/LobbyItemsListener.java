@@ -8,6 +8,7 @@ import ga.guimx.gbunkers.utils.Arena;
 import ga.guimx.gbunkers.utils.Chat;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
+import ga.guimx.gbunkers.utils.guis.Spectator;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class JoinLeaveQueueListener implements Listener {
+public class LobbyItemsListener implements Listener {
     Random rand = new Random();
     int timer = 10;
     @EventHandler
@@ -35,6 +36,7 @@ public class JoinLeaveQueueListener implements Listener {
             player.sendMessage(Chat.transPrefix(PluginConfig.getMessages().get("joined_queue")));
             player.getInventory().clear();
             player.getInventory().setItem(0,PluginConfig.getLobbyInventory().get("queued"));
+            player.getInventory().setItem(4,PluginConfig.getLobbyInventory().get("spectator"));
             if (PlayerInfo.getPlayersQueued().size() < PluginConfig.getPlayersNeededToStartGame() || timer != 10) return;
             event.getPlayer().getWorld().getPlayers().forEach(p -> p.sendMessage(Chat.trans("&aQueue is enough to start a game, starting 10 second timer...")));
             Task.runTimer(task -> {
@@ -63,6 +65,9 @@ public class JoinLeaveQueueListener implements Listener {
             player.sendMessage(Chat.transPrefix(PluginConfig.getMessages().get("left_queue")));
             player.getInventory().clear();
             player.getInventory().setItem(0, PluginConfig.getLobbyInventory().get("not_queued"));
+            player.getInventory().setItem(4,PluginConfig.getLobbyInventory().get("spectator"));
+        }else if (event.getMaterial() == PluginConfig.getLobbyInventory().get("spectator").getType() && !PlayerInfo.getPlayersInGame().contains(player.getUniqueId())){
+            new Spectator(player).open();
         }
     }
 

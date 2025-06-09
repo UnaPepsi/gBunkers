@@ -12,8 +12,8 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.NotImplementedException;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.util.List;
@@ -22,14 +22,14 @@ import java.util.stream.Collectors;
 
 public class Team {
     @Getter
-    private final List<Player> members;
+    private final List<UUID> members;
     @Getter
     private int dtr;
     @Getter
     private final ChatColor color;
     private boolean check = true;
     private TeamManager.Team team;
-    public Team(List<Player> members, ChatColor color){
+    public Team(List<UUID> members, ChatColor color){
         this.members = members;
         this.color = color;
     }
@@ -41,8 +41,8 @@ public class Team {
         NamedTextColor displayNameColor = NamedTextColor.NAMES.value(color.name().toLowerCase());
         Color markerColor = new Color(displayNameColor.red(), displayNameColor.green(), displayNameColor.blue());
         this.team = GBunkers.getTeamManager().createTeam();
-        members.forEach(p -> {
-            team.addMember(new TeamManager.TeamPlayerWaypoint(p,displayNameColor,markerColor));
+        members.forEach(uuid -> {
+            team.addMember(new TeamManager.TeamPlayerWaypoint(Bukkit.getPlayer(uuid),displayNameColor,markerColor));
         });
         Task.runTimer(c -> {
             if(!check){
@@ -64,23 +64,22 @@ public class Team {
         GBunkers.getTeamManager().deleteTeam(team.getTeamId());
     }
     public void removeWaypoints(){
-        List<UUID> memberUUIDs = getMembers().stream().map(Player::getUniqueId).collect(Collectors.toList());
         Recipients recipients = Recipients.of(
                 Apollo.getPlayerManager().getPlayers().stream()
-                        .filter(apolloPlayer -> memberUUIDs.contains(apolloPlayer.getUniqueId()))
+                        .filter(apolloPlayer -> members.contains(apolloPlayer.getUniqueId()))
                         .collect(Collectors.toList())
         );
         Apollo.getModuleManager().getModule(WaypointModule.class).resetWaypoints(recipients);
     }
     public Team setLunarNametags(){
-        members.forEach(member -> {
-            Nametags.getPlayersLunarNametag().put(member, Lists.newArrayList(
+        members.forEach(uuid -> {
+            Nametags.getPlayersLunarNametag().put(uuid, Lists.newArrayList(
                     Component.text()
-                            .content(member.getDisplayName())
+                            .content(Bukkit.getPlayer(uuid).getDisplayName())
                             .color(NamedTextColor.NAMES.value(color.name().toLowerCase()))
                             .build()
             ));
-            Nametags.apply(member);
+            Nametags.apply(Bukkit.getPlayer(uuid));
         });
         return this;
     }

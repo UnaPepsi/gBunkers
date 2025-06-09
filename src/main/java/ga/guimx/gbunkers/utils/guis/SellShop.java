@@ -34,8 +34,8 @@ public class SellShop extends ConfigurableGui {
             }
         }
         PlayerInfo.getPlayersBalance().put(
-                player,
-                PlayerInfo.getPlayersBalance().get(player)+amount*moneyValue
+                player.getUniqueId(),
+                PlayerInfo.getPlayersBalance().get(player.getUniqueId())+amount*moneyValue
         );
         if (amount > 0){
             player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);

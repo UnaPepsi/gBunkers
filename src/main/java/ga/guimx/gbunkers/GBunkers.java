@@ -8,7 +8,7 @@ import ga.guimx.gbunkers.commands.*;
 import ga.guimx.gbunkers.config.ArenasConfig;
 import ga.guimx.gbunkers.config.PluginConfig;
 import ga.guimx.gbunkers.listeners.EntityListener;
-import ga.guimx.gbunkers.listeners.JoinLeaveQueueListener;
+import ga.guimx.gbunkers.listeners.LobbyItemsListener;
 import ga.guimx.gbunkers.listeners.PlayerListener;
 import ga.guimx.gbunkers.utils.*;
 import lombok.Getter;
@@ -75,7 +75,7 @@ public class GBunkers extends JavaPlugin {
     }
     void enableListeners(){
         getServer().getPluginManager().registerEvents(playerListener,this);
-        getServer().getPluginManager().registerEvents(new JoinLeaveQueueListener(),this);
+        getServer().getPluginManager().registerEvents(new LobbyItemsListener(),this);
         getServer().getPluginManager().registerEvents(new EntityListener(),this);
     }
     void checkForUpdates(){

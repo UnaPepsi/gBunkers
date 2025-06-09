@@ -39,29 +39,29 @@ public class PAPIHook extends PlaceholderExpansion {
                 if (onlinePlayer == null){
                     return "0";
                 }
-                return PlayerInfo.getPlayersBalance().getOrDefault(onlinePlayer,0)+"";
+                return PlayerInfo.getPlayersBalance().getOrDefault(onlinePlayer.getUniqueId(),0)+"";
             case "dtr":
                 if (onlinePlayer == null){
                     return "NaN";
                 }
                 ArenaInfo.getArenasInUse().forEach((arena,map) -> {
                     map.values().forEach(team -> {
-                        if (team.getMembers().contains(onlinePlayer)){
+                        if (team.getMembers().contains(onlinePlayer.getUniqueId())){
                             result.set(team.getDtr() + "");
                         }
                     });
                 });
                 return result.get();
             case "bard_energy":
-                if (onlinePlayer == null || !PlayerInfo.getBardEnergy().containsKey(onlinePlayer)){
+                if (onlinePlayer == null || !PlayerInfo.getBardEnergy().containsKey(onlinePlayer.getUniqueId())){
                     return "0";
                 }
-                return PlayerInfo.getBardEnergy().getOrDefault(onlinePlayer,(short)0)+"";
+                return PlayerInfo.getBardEnergy().getOrDefault(onlinePlayer.getUniqueId(),(short)0)+"";
             case "bard_cooldown":
-                if (onlinePlayer == null || !PlayerInfo.getBardCD().containsKey(onlinePlayer)){
+                if (onlinePlayer == null || !PlayerInfo.getBardCD().containsKey(onlinePlayer.getUniqueId())){
                     return "0";
                 }
-                return PlayerInfo.getBardCD().getOrDefault(onlinePlayer,0L)+"";
+                return PlayerInfo.getBardCD().getOrDefault(onlinePlayer.getUniqueId(),0L)+"";
         }
         return null;
     }

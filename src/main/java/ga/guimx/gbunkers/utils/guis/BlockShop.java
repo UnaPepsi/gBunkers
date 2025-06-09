@@ -32,14 +32,14 @@ public class BlockShop extends ConfigurableGui {
         item.setItemMeta(meta);
         int moneyValue = PluginConfig.getShopPrices().get(e.getCurrentItem().getType().name().toLowerCase().replace('_','-'));
         int amount = e.isRightClick() ? 64 : 1;
-        if (PlayerInfo.getPlayersBalance().get(player) < moneyValue * amount){
+        if (PlayerInfo.getPlayersBalance().get(player.getUniqueId()) < moneyValue * amount){
             player.playSound(player.getLocation(), Sound.VILLAGER_NO,1,1);
             return;
         }
         for (int i = 0; i < amount; i++){
             player.getInventory().addItem(item);
         }
-        PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)-moneyValue*amount);
+        PlayerInfo.getPlayersBalance().put(player.getUniqueId(),PlayerInfo.getPlayersBalance().get(player.getUniqueId())-moneyValue*amount);
         player.playSound(player.getLocation(), Sound.LEVEL_UP,1,1);
 
     }

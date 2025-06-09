@@ -11,7 +11,9 @@ import ga.guimx.gbunkers.utils.Nametags;
 import ga.guimx.gbunkers.utils.PlayerInfo;
 import ga.guimx.gbunkers.utils.Task;
 import lombok.var;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -37,20 +39,26 @@ public class FactionCommand {
         }
         String finalLookUp = lookUp;
         AtomicBoolean found = new AtomicBoolean(false);
-        ArenaInfo.getArenasInUse().forEach((arena, map) -> {
-            map.values().stream()
-                    .filter(team -> !team.getMembers().isEmpty() && team.getMembers().get(0).getWorld().equals(sender.getWorld()) &&
-                            (team.getMembers().stream().map(p -> p.getName().toLowerCase()).collect(Collectors.toList()).contains(finalLookUp.toLowerCase()) || team.getColor().name().equalsIgnoreCase(finalLookUp)))
-                    .findAny().ifPresent(team -> {
+        ArenaInfo.getArenasInUse().entrySet().stream().filter(entry -> entry.getValue().values().stream().anyMatch(t -> t.getMembers().contains(sender.getUniqueId())))
+                .findFirst().ifPresent(entry -> {
+                    entry.getValue().values().stream().filter(t -> {
+                        return t.getMembers().stream().anyMatch(u -> Bukkit.getOfflinePlayer(u).getName().equalsIgnoreCase(finalLookUp)) ||
+                        t.getColor().name().equalsIgnoreCase(finalLookUp);
+                    }).findFirst().ifPresent(team -> {
                         found.set(true);
-                        Location home = arena.getTeams().get(team.getColor().name().toLowerCase()).getHome();
+                        Location home = entry.getKey().getTeams().get(team.getColor().name().toLowerCase()).getHome();
                         sender.sendMessage(Chat.trans("&9%team%:\n&aHome: %home%\n&aDTR: %dtr%\n&aMembers: %members%"
                                 .replace("%team%", team.getColor()+team.getColor().name())
                                 .replace("%home%",String.format("%d, %d, %d",home.getBlockZ(),home.getBlockY(),home.getBlockZ()))
                                 .replace("%dtr%",(team.getDtr() > 0 ? team.getDtr() > 1 ? ChatColor.GREEN : ChatColor.YELLOW : ChatColor.RED) + (team.getDtr()+""))
-                                .replace("%members%",team.getColor()+team.getMembers().stream().map(Player::getDisplayName).collect(Collectors.joining(", ")))));
+                                .replace("%members%",team.getColor()+team.getMembers().stream().map(u -> {
+                                    var ofPlayer = Bukkit.getOfflinePlayer(u);
+                                    if (!ofPlayer.isOnline()) return ChatColor.GRAY+ofPlayer.getName();
+                                    if (ofPlayer.getPlayer().getGameMode() == GameMode.SPECTATOR) return ChatColor.STRIKETHROUGH+ofPlayer.getName();
+                                    return Bukkit.getOfflinePlayer(u).getName();
+                                }).collect(Collectors.joining(", ")))));
                     });
-        });
+                });
         if (!found.get()){
             sender.sendMessage(Chat.trans("&cNothing found"));
         }
@@ -66,10 +74,10 @@ public class FactionCommand {
             sender.sendMessage(Chat.trans("&cYou're already teleporting to your faction's HQ"));
             return;
         }
-        var nametag = Nametags.getPlayersLunarNametag().get(sender);
+        var nametag = Nametags.getPlayersLunarNametag().get(sender.getUniqueId());
         sender.sendMessage(Chat.trans(PluginConfig.getMessages().get("f_home")));
         ArenaInfo.getArenasInUse().forEach((arena,map) -> {
-            map.values().stream().filter(team -> team.getMembers().contains(sender)).findAny().ifPresent(team -> {
+            map.values().stream().filter(team -> team.getMembers().contains(sender.getUniqueId())).findAny().ifPresent(team -> {
                 AtomicInteger timer = new AtomicInteger(11);
                 PlayerInfo.getPlayersFHomming().add(sender.getUniqueId());
                 Task.runTimer(task -> {

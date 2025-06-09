@@ -11,7 +11,7 @@ lobby:
 lobby_items:
   not_queued: INK_SACK:8
   queued: INK_SACK:10
-  spec: CLOCK
+  spectator: WATCH
 money_ores:
   COAL: 20
   IRON_INGOT: 30
@@ -78,8 +78,8 @@ messages:
   broadcast: "%player% &f&ais hosting a game of bunkers!"
   start_arena_setup: "&eIf at any point you wish to cancel the arena creation, type 'cancel'"
   set_arena_name: "&eType the Arena's display name (color codes included)"
-  set_arena_border_1: "&eGo to the first corner of the Arena and type done"
-  set_arena_border_2: "&eGo to the second corner of the Arena and type done"
+  set_arena_border_1: "&eGo to the lower corner of the Arena and type done"
+  set_arena_border_2: "&eGo to the higher corner of the Arena and type done"
   set_team_home: "&eGo to %team%&e's home and type done"
   set_team_claim_border_1: "&eGo to %team%&e's first claim corner and type done"
   set_team_claim_border_2: "&eGo to %team%&e's second claim corner and type done"

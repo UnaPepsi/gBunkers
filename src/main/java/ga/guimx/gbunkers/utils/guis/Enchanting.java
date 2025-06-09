@@ -102,12 +102,12 @@ public class Enchanting extends Gui {
                                 addItem(slotPos,barrier);
                             }else{
                                 addItem(new Icon(enchantmentsItem.get(enchantment)).onClick(e -> {
-                                    if (PlayerInfo.getPlayersBalance().get(player) < moneyValue){
+                                    if (PlayerInfo.getPlayersBalance().get(player.getUniqueId()) < moneyValue){
                                         player.playSound(player.getLocation(),Sound.VILLAGER_NO,1,1);
                                         return;
                                     }
                                     player.playSound(player.getLocation(),Sound.LEVEL_UP,1,1);
-                                    PlayerInfo.getPlayersBalance().put(player,PlayerInfo.getPlayersBalance().get(player)-moneyValue);
+                                    PlayerInfo.getPlayersBalance().put(player.getUniqueId(),PlayerInfo.getPlayersBalance().get(player.getUniqueId())-moneyValue);
                                     itemStack.addEnchantment(enchantment,enchantments.get(enchantment));
                                     addItem(finalSlotPos,barrier);
                                 }),slotPos);
