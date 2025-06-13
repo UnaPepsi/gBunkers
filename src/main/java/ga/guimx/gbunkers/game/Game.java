@@ -166,7 +166,7 @@ public class Game {
                 sellshop.f(tag);
                 nmsWorld.addEntity(sellshop);
                 EntityVillager equipmentshop = new EntityVillager(nmsWorld);
-                equipmentshop.setPosition(team.getBlockShop().getX(),team.getBlockShop().getY(),team.getBlockShop().getZ());
+                equipmentshop.setPosition(team.getEquipmentShop().getX(),team.getEquipmentShop().getY(),team.getEquipmentShop().getZ());
                 equipmentshop.b(true);
                 equipmentshop.setCustomName(ChatColor.valueOf(color.toUpperCase())+"Equipment Shop");
                 equipmentshop.setAge(1);

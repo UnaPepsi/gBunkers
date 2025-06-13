@@ -39,7 +39,7 @@ public class TeamManager {
         Team team = teamsByTeamId.remove(teamId);
 
         if (team != null) {
-            team.getMembers().forEach(team::removeMember);
+            new ArrayList<>(team.getMembers()).forEach(team::removeMember);
         }
     }
     @Getter
